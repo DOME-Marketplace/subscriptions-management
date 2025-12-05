@@ -1,10 +1,11 @@
 package it.eng.dome.subscriptions.management.config;
 
-import com.fasterxml.jackson.databind.Module;
-import it.eng.dome.brokerage.utils.enumappers.TMF637EnumModule;
-import it.eng.dome.brokerage.utils.enumappers.TMF678EnumModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.databind.Module;
+
+import it.eng.dome.brokerage.utils.enumappers.TMF637EnumModule;
 
 @Configuration
 public class JacksonModuleConfig {
