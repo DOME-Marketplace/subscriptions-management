@@ -1,0 +1,92 @@
+package it.eng.dome.subscriptions.management.utils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import it.eng.dome.tmforum.tmf620.v4.model.ProductOffering;
+import it.eng.dome.tmforum.tmf637.v4.model.Product;
+import it.eng.dome.subscriptions.management.model.Role;
+
+class RP {
+
+    String id;
+    String role;
+
+    public RP(String id, String role) {
+        this.id = id;
+        this.role = role;
+    }
+
+}
+
+public class RelatedPartyUtils {
+
+    // work on a common class
+    private static Boolean hasRPWithRole(List<RP> relatedParties, String partyId, Role partyRole) {
+        if (relatedParties != null) {
+            for (RP rp : relatedParties) {
+                if (partyId != null && partyId.equalsIgnoreCase(rp.id) && partyRole != null
+                        && partyRole.getValue().equalsIgnoreCase(rp.role)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static Boolean productHasPartyWithRole(Product product, String partyId, Role partyRole) {
+        List<RP> parties = product.getRelatedParty().stream().map(party -> new RP(party.getId(), party.getRole()))
+                .toList();
+        return RelatedPartyUtils.hasRPWithRole(parties, partyId, partyRole);
+    }
+
+//    public static Boolean subscriptionHasPartyWithRole(Subscription subscription, String partyId, Role partyRole) {
+//        List<RP> parties = subscription.getRelatedParties().stream()
+//                .map(party -> new RP(party.getId(), party.getRole())).toList();
+//        return RelatedPartyUtils.hasRPWithRole(parties, partyId, partyRole);
+//    }
+
+    public static Boolean offeringHasPartyWithRole(ProductOffering productOffering, String partyId, Role partyRole) {
+        // TODO: uncomment the following when the ProductOffering will have relatedParties
+        /*
+        List<RP> parties = productOffering.getRelatedParties().stream()
+                .map(party -> new RP(party.getId(), party.getRole())).toList();
+        return RelatedPartyUtils.hasRPWithRole(parties, partyId, partyRole);
+        */
+        return true;
+    }
+
+    public static List<Product> retainProductsWithParty(List<Product> products, String partyId, Role partyRole) {
+        List<Product> retainedProducts = new ArrayList<>();
+        for (Product p : products)
+            if (RelatedPartyUtils.productHasPartyWithRole(p, partyId, partyRole))
+                retainedProducts.add((p));
+        return retainedProducts;
+    }
+
+//    public static List<Subscription> retainSubscriptionsWithParty(List<Subscription> subscriptions, String partyId,
+//                                                                  Role partyRole, boolean onlyActiveSub) {
+//        List<Subscription> retainedSubscriptions = new ArrayList<>();
+//        for (Subscription s : subscriptions) {
+//            // skip if subscription does NOT have that party/role
+//            if (!RelatedPartyUtils.subscriptionHasPartyWithRole(s, partyId, partyRole)) {
+//                continue;
+//            }
+//            // skip if onlyActive required and subscription is not Active
+//            if (onlyActiveSub && !"active".equalsIgnoreCase(s.getStatus())) {
+//                continue;
+//            }
+//            retainedSubscriptions.add(s);
+//        }
+//        return retainedSubscriptions;
+//    }
+
+    public static List<ProductOffering> retainProductOfferingsWithParty(List<ProductOffering> offerings, String partyId, Role partyRole) {
+        List<ProductOffering> retainedOfferings = new ArrayList<>();
+        for (ProductOffering o : offerings)
+            if (RelatedPartyUtils.offeringHasPartyWithRole(o, partyId, partyRole))
+                retainedOfferings.add((o));
+        return retainedOfferings;
+    }
+
+}

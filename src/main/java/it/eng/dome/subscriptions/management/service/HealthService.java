@@ -1,0 +1,148 @@
+package it.eng.dome.subscriptions.management.service;
+
+import it.eng.dome.brokerage.api.APIPartyApis;
+import it.eng.dome.brokerage.api.AccountManagementApis;
+import it.eng.dome.brokerage.api.ProductCatalogManagementApis;
+import it.eng.dome.brokerage.api.ProductInventoryApis;
+import it.eng.dome.brokerage.api.fetch.FetchUtils;
+import it.eng.dome.brokerage.observability.AbstractHealthService;
+import it.eng.dome.brokerage.observability.health.Check;
+import it.eng.dome.brokerage.observability.health.Health;
+import it.eng.dome.brokerage.observability.health.HealthStatus;
+import it.eng.dome.brokerage.observability.info.Info;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class HealthService extends AbstractHealthService {
+
+	private final Logger logger = LoggerFactory.getLogger(HealthService.class);
+	private final static String SERVICE_NAME = "Subscriptions Management";
+
+	private final ProductCatalogManagementApis productCatalogManagementApis;
+	private final APIPartyApis apiPartyApis;
+	private final ProductInventoryApis productInventoryApis;
+	private final AccountManagementApis accountManagementApis;
+
+	public HealthService(ProductCatalogManagementApis productCatalogManagementApis, APIPartyApis apiPartyApis, ProductInventoryApis productInventoryApis, AccountManagementApis accountManagementApis) {
+		this.productCatalogManagementApis = productCatalogManagementApis;
+		this.apiPartyApis = apiPartyApis;
+		this.productInventoryApis = productInventoryApis;
+		this.accountManagementApis = accountManagementApis;
+	}
+
+	@Override
+	public Info getInfo() {
+
+		Info info = super.getInfo();
+		logger.debug("Response: {}", toJson(info));
+
+		return info;
+	}
+
+	@Override
+	public Health getHealth() {
+		Health health = new Health();
+		health.setDescription("Health for the " + SERVICE_NAME);
+
+		health.elevateStatus(HealthStatus.PASS);
+
+		// 1: check of the TMForum APIs dependencies
+		for (Check c : getTMFChecks()) {
+			health.addCheck(c);
+			health.elevateStatus(c.getStatus());
+		}
+
+		// 2: check dependencies: in case of FAIL or WARN set it to WARN
+		boolean onlyDependenciesFailing = health.getChecks("self", null).stream()
+				.allMatch(c -> c.getStatus() == HealthStatus.PASS);
+		
+		if (onlyDependenciesFailing && health.getStatus() == HealthStatus.FAIL) {
+	        health.setStatus(HealthStatus.WARN);
+	    }
+
+		// 3: check self info
+		Check selfInfo = getChecksOnSelf(SERVICE_NAME);
+		health.addCheck(selfInfo);
+		health.elevateStatus(selfInfo.getStatus());
+	    
+	    // 4: build human-readable notes
+	    health.setNotes(buildNotes(health));
+		
+		logger.debug("Health response: {}", toJson(health));
+		
+		return health;
+	}
+
+	private List<Check> getTMFChecks() {
+
+		List<Check> out = new ArrayList<>();
+
+		// TMF620
+		Check tmf620 = createCheck("tmf-api", "connectivity", "tmf620");
+
+		try {
+			FetchUtils.streamAll(productCatalogManagementApis::listProductOfferings, null, null, 1).findAny();
+
+			tmf620.setStatus(HealthStatus.PASS);
+
+		} catch (Exception e) {
+			tmf620.setStatus(HealthStatus.FAIL);
+			tmf620.setOutput(e.toString());
+		}
+
+		out.add(tmf620);
+
+		// TMF632
+		Check tmf632 = createCheck("tmf-api", "connectivity", "tmf632");
+
+		try {
+			FetchUtils.streamAll(apiPartyApis::listOrganizations, null, null, 1).findAny();
+
+			tmf632.setStatus(HealthStatus.PASS);
+
+		} catch (Exception e) {
+			tmf632.setStatus(HealthStatus.FAIL);
+			tmf632.setOutput(e.toString());
+		}
+
+		out.add(tmf632);
+
+		// TMF637
+		Check tmf637 = createCheck("tmf-api", "connectivity", "tmf637");
+
+		try {
+			FetchUtils.streamAll(productInventoryApis::listProducts, null, null, 1).findAny();
+
+			tmf637.setStatus(HealthStatus.PASS);
+
+		} catch (Exception e) {
+			tmf637.setStatus(HealthStatus.FAIL);
+			tmf637.setOutput(e.toString());
+		}
+
+		out.add(tmf637);
+
+		// TMF666
+		Check tmf666 = createCheck("tmf-api", "connectivity", "tmf666");
+
+		try {
+			FetchUtils.streamAll(accountManagementApis::listBillingAccounts, null, null, 1).findAny();
+
+			tmf666.setStatus(HealthStatus.PASS);
+
+		} catch (Exception e) {
+			tmf666.setStatus(HealthStatus.FAIL);
+			tmf666.setOutput(e.toString());
+		}
+
+		out.add(tmf666);
+
+		return out;
+	}
+
+}

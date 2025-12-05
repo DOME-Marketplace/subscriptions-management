@@ -1,0 +1,443 @@
+/* ==========================
+   BASE STYLES
+========================== */
+body {
+    margin: 0;
+    font-family: 'Fira Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;    
+    color: black;
+    background: #f4f4f4;
+    overflow: hidden;
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+    margin-top: -1vh;
+}
+
+/* ==========================
+   NAVBAR
+========================== */
+.top-navbar {
+    width: 100%;
+    height: 75px;
+    background: #2d58a7;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 20px;
+    box-sizing: border-box;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.top-navbar .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.top-navbar .logo {
+    height: 2.5rem;
+}
+
+.top-navbar .app-title {
+    font-size: 18px;
+    margin: 0;
+}
+
+.top-navbar .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* .user-greeting {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* spazio tra badge e eventuali altri elementi della navbar 
+} */
+
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* spazio tra icona e nome */
+    background-color: #2b2b40; /* rosso come logout */
+    color: white;
+    padding: 8px 8px;
+    border-radius: 10px; /* riquadro ovale */
+    font-size: 14px;
+    /* font-weight: 500; */
+}
+
+.user-name {
+    color: #00ADD3;
+    font-size: 16px;
+}
+
+/* btn logout */
+.logout {
+    background-color: #d9534f; /* rosso */
+    color: white;
+    border: none;
+    padding: 8px 8px;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.logout:hover {
+    background-color: #c9302c; /* rosso scuro */
+}
+
+/* ==========================
+   PAGE TITLE
+========================== */
+
+.page-title {
+    font-size: 30px;
+    font-weight: 600;
+    color: #2d58a7; /* blu simile navbar, opzionale */
+    margin: 30px 0 0 60px; /* margine sopra e sinistra */
+    padding-bottom: 6px;
+    border-bottom: 6px solid #00ADD3; /* barra sottostante */
+    width: fit-content; /* la barra segue solo il testo */
+}
+
+
+/* ==========================
+   SIDEBAR
+========================== */
+.sidebar {
+    /* width: 300px; */
+    width: 30%; /* of display or container */
+    min-width: 200px;
+    max-width: 350px;
+    background: #2d58a7;
+    color: #fff;
+    padding: 20px;
+    overflow-y: scroll;
+    margin: 5vh;
+    margin-bottom: 15vh;
+    border-radius: 1.2rem;
+    /* border: 5px solid #a30500; */
+}
+
+.sidebar h2 {
+    margin-top: 0;
+    text-align: center;
+    font-size: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #2b2b40;
+}
+
+/* Organization cards */
+.org-list .org-card {
+    background: #2b2b40;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.org-list .org-card:hover {
+    background: #3a3a55;
+    transform: translateY(-2px);
+}
+
+.org-card h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.org-card p {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: #ccc;
+}
+
+/* ==========================
+   MAIN PANEL
+========================== */
+.main {
+    /* flex: 0 0 70%; */
+    flex: 1;
+    padding: 20px;
+    background-color: #DDE6F6;
+    margin-top: 5vh;
+    margin-right: 5vh;
+    margin-bottom: 15vh;
+    border-radius: 1rem;
+    overflow-y: auto;
+    /* max-width: 70%; */
+}
+
+/* main container of main split into 2 column */
+.subscriptions-container {
+    display: flex;
+    gap: 20px; /*space between right and left */
+}
+
+/* LEFT PANEL */
+.subscriptions-left {
+    flex: 2 ;
+}
+
+/* RIGHT PANEL (NEW SUB) */
+.subscriptions-right {
+    flex: 1;
+    padding: 15px;
+    border-radius: 12px;
+    min-width: 100px;
+    max-width: 500px;
+    height: fit-content;
+    display: none;
+}
+
+.subscriptions-right {
+    align-self: flex-start; /* si allinea in alto con il left panel */
+}
+
+#assign-plan-panel h3 {
+    margin-top: 0;
+    font-size: 16px;
+}
+
+#plan-list {
+    margin-top: 10px;
+}
+
+/* ==========================
+   ORGANIZATION HEADER
+========================== */
+.org-header {
+    background: #2b2b40;
+    color: #fff;
+    border-radius: 12px;
+    padding: 20px 25px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    margin-bottom: 20px;
+    /* border-left: 6px solid #007bff; */
+    /* border-left: 6px solid #00ADD3; */
+    animation: fadeIn 0.3s ease;
+    display: none;
+}
+
+.org-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #ccc;
+}
+
+.org-header p {
+    margin: 6px 0 0 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.org-header small {
+    font-size: 14px;
+    color: #bbb;
+}
+
+/* Colore diverso solo per il titolo dentro l'header dell'organizzazione */
+.org-header-title {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #ffffff;
+    /* border-bottom: 2px solid #eee; */
+    border-bottom: 2px solid #00ADD3;
+    padding-bottom: 6px;
+}
+
+/* ==========================
+   SECTION TITLES
+========================== */
+.section-title {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #222;
+    /* border-bottom: 2px solid #eee; */
+    border-bottom: 2px solid #00ADD3;
+    padding-bottom: 6px;
+}
+
+/* ==========================
+   SUBSCRIPTION CARD
+========================== */
+.sub-card {
+    background: #ffffff;
+    /* border-left: 6px solid #007bff; */
+    /* border-left: 6px solid #00ADD3; */
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease;
+}
+
+.sub-card h3 {
+    margin: 0 0 6px 0;
+    font-size: 19px;
+    color: #2b2b40;
+}
+
+.sub-card p {
+    margin: 4px 0 0 0;
+    font-size: 16px;
+    color: #2b2b40;
+}
+
+.sub-card select.status-select {
+    margin-left: 6px;
+    padding: 4px 8px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #2b2b40;
+}
+
+/* Pulsante edit piccolo accanto al select */
+.edit-btn {
+    margin-left: 6px;
+    padding: 2px 6px;
+    font-size: 15px;
+}
+
+/* Contenitore dei pulsanti Confirm/Cancel */
+.action-buttons {
+    margin-top: 6px;
+    display: none; /* inizialmente nascosto */
+}
+
+/* Pulsanti conferma e annulla */
+.confirm-btn, .cancel-btn {
+    padding: 4px 8px;
+    font-size: 13px;
+    margin-right: 6px;
+}
+
+/* ==========================
+   PLAN CARD
+========================== */
+.plan-card {
+    background: #ffffff;
+    /* border-left: 6px solid #007bff; */
+    /* border-left: 6px solid #00ADD3; */
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease;
+}
+
+.plan-card h4 {
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    color: #2b2b40;
+}
+
+.plan-card p {
+    margin: 4px 0 0 0;
+    font-size: 16px;
+    color: #2b2b40;
+}
+
+.plan-card .btn {
+    margin-top: 10px;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+/* ==========================
+   BUTTONS
+========================== */
+button {
+    /* background: #007bff; */
+    background: #2d58a7;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+button.secondary {
+    background: #6c757d;
+}
+
+button:hover {
+    /* background: #0056b3; */
+    background: #00ADD3;
+}
+
+/* ==========================
+   INPUTS
+========================== */
+.input-group {
+    margin-top: 15px;
+}
+
+input {
+    padding: 8px;
+    width: 20%;
+    margin-top: 6px;
+}
+
+/* ==========================
+   MODALS
+========================== */
+.modal-overlay, .confirm-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.45);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    /*display: flex;  flex per centrare */
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.confirm-modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 500px;
+    max-width: 90%;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.3);
+    text-align: left;
+    font-family: 'Fira Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    position: relative;
+}
+
+.confirm-modal-content h2 {
+    margin-top: 0;
+}
+
+/* ==========================
+   ANIMATIONS
+========================== */
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(10px);}
+    to   {opacity: 1; transform: translateY(0);}
+}

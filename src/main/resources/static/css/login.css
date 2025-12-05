@@ -1,0 +1,159 @@
+/* Fullscreen background */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Fira Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;    
+    color: white;
+    height: 100vh;
+    overflow: hidden;
+    background-image: url("../media/dome-background.png"); /* tua immagine */
+    background-size: cover;       /* riempie tutto lo schermo */
+    background-position: center;  /* centra l’immagine */
+    background-repeat: no-repeat; /* evita ripetizioni */
+    background-attachment: fixed;
+}
+
+/* Container */
+.login-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+/* Help text */
+.welcome-text {
+    font-size: 14px;
+    opacity: 0.9;
+    color: #A0A3A6;
+    margin-bottom: 28px;
+}
+
+.welcome-text p {
+    align-content: start;
+}
+
+/* Green banner */
+.info-box {
+    background: #38AD69;
+    padding: 35px 20px; /* UGUALE ALLA LOGIN CARD */
+    width: 430px;
+    height: 310px;      /* altezza IDENTICA */
+    margin: 0 auto 40px auto;
+    font-weight: bold;
+    box-shadow: 0 8px 14px rgba(0,0,0,0.3);
+}
+
+.info-text {
+    margin: 0;               /* rimuove margini di default */
+    text-align: center;      /* centra orizzontalmente */
+    font-size: 14px;         /* puoi modificare la dimensione */
+    font-weight: bold;
+    line-height: 1.45;
+
+    /* Flex */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;          
+}
+
+/* White login card */
+.login-card {
+    width: 422px;
+    height: 310px;      /* altezza IDENTICA */
+    background: white;
+    color: #444;
+    padding: 35px 20px 45px 20px;
+    box-shadow: 0 8px 14px rgba(0,0,0,0.3);
+}
+
+.box-same-size {
+    width: 422px;       /* larghezza IDENTICA */
+    height: 310px;      /* altezza IDENTICA */
+    box-sizing: border-box; 
+    margin: 0 auto 28px auto;
+    border-radius: 4px;
+}
+
+.info-box,
+.login-card {
+    width: 422px; /* opzionale */
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/* Logo */
+.logo {
+    /* max-width: 200px;
+    max-height: 100px;     */
+    height: 130px;
+    width: auto;       /* mantiene proporzioni */
+    /* width: 110px; */
+    margin-bottom: 20px auto 42px;
+}
+
+/* Divider */
+.login-card hr {
+    border: none;
+    height: 1px;
+    background: #dcdcdc;
+    margin: 10px 0 20px 0;
+}
+
+/* Label */
+.login-label {
+    margin-top: 28px;
+    font-size: 12px;
+    color: #7a7a7a;
+    margin-bottom: 20px;
+
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.login-label::before,
+.login-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #dcdcdc;
+    margin: 0 10px; /* spazio tra linea e testo */
+}
+
+/* Login button */
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    background: #454545;
+    color: white;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.login-btn:hover {
+    background: #222;
+}
+
+/* Help text */
+.login-help {
+    margin-top: 25px;
+    font-size: 14px;
+    opacity: 0.9;
+    color: #A0A3A6;
+}
+
+.login-help a {
+    color: #A0A3A6;
+    text-decoration: underline;
+}
