@@ -8,24 +8,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         // ==========================
         // GESTIONE CODE DA KEYCLOAK
         // ==========================
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get("code");
-        if(code) await exchangeCodeForToken(code);
+        // const params = new URLSearchParams(window.location.search);
+        // const code = params.get("code");
+        // if(code) await exchangeCodeForToken(code);
 
         // ==========================
         // TOKEN CONTROL
         // ==========================
         const token = sessionStorage.getItem("token");
         if(!token){
-            redirectToLocalLogin();
-            return;
+            // redirectToLocalLogin();
+            // return;
         }
 
         // ==========================
         // SALUTO UTENTE + LOGOUT
         // ==========================
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const username = payload.preferred_username || payload.name || "Unknown";
+        // const payload = JSON.parse(atob(token.split('.')[1]));
+        // const username = payload.preferred_username || payload.name || "Guest";
+        const username = "devMode";
         const userNameElem = document.querySelector("#user-name");
         if(userNameElem) userNameElem.textContent = username;
 

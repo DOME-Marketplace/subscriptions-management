@@ -1,6 +1,6 @@
 import { safeFetch } from "./auth.js";
 
-const API_BASE = "http://localhost:8780";
+const API_BASE = "http://localhost:8680";
 
 export async function fetchOrganizations() {
     return await safeFetch(`${API_BASE}/management/organizations`);

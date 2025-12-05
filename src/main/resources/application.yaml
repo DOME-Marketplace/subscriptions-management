@@ -2,14 +2,14 @@ spring:
   application:
     name: subscriptions-management
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/myrealm
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: http://localhost:8080/realms/myrealm
 
 server:
-  port: 8780
+  port: 8680
   servlet:
     context-path: ${BILLING_PREFIX:/}
 

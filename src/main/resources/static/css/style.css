@@ -213,6 +213,21 @@ body {
     margin-top: 10px;
 }
 
+.no-plans-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease;
+    text-align: center;
+}
+
+.no-plans-card p {
+    margin: 0;
+    color: #2b2b40;
+}
+
 /* ==========================
    ORGANIZATION HEADER
 ========================== */

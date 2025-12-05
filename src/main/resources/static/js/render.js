@@ -137,6 +137,15 @@ export function renderSubscription(orgId, products, infoDiv, updateCallback, upd
 // Render plan selection
 export function renderPlanSelection(org, plans, onSelectPlan, container) {
     clear(container);
+    
+    if (!plans || plans.length === 0) {
+        const div = ce("div", "no-plans-card");
+        div.innerHTML = `<p>No plans available.</p>`;
+        container.appendChild(div);
+        container.style.display = "block";
+        return;
+    }
+
     plans.forEach(plan => {
         const isFederated = plan.name.toLowerCase().includes("federated");
         const div = ce("div","plan-card");

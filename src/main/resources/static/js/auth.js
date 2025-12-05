@@ -94,10 +94,10 @@ export async function exchangeCodeForToken(code) {
 // ==========================
 export async function safeFetch(url, options = {}) {
     let token = sessionStorage.getItem("token");
-    if (!token) {
-        await redirectToLogin();
-        return;
-    }
+    // if (!token) {
+    //     await redirectToLogin();
+    //     return;
+    // }
 
     const res = await fetch(url, {
         ...options,
