@@ -103,7 +103,7 @@ public class SubscriptionManagementService {
     }
 
     public BillingAccountRef getBillingAccountByOrganization (String orgId) throws ExternalServiceException {
-        HashMap<String, String> flt = new HashMap<>();
+        Map<String, String> flt = new HashMap<>();
         flt.put("relatedParty.id", orgId);
 
         BillingAccount ba;
@@ -124,15 +124,16 @@ public class SubscriptionManagementService {
         return baRef;
     }
 
-    public ArrayList<String> getProductStatuses() {
-        ArrayList<String> statuses = new ArrayList<>();
+    public List<String> getProductStatuses() {
+        List<String> statuses = new ArrayList<>();
         for (ProductStatusType status : ProductStatusType.values()) {
             statuses.add(status.toString());
         }
         return statuses;
     }
 
-    public void updateProduct(String buyerId, Product incomingProduct)
+    @SuppressWarnings("null")
+	public void updateProduct(String buyerId, Product incomingProduct)
             throws ExternalServiceException, BadTmfDataException {
         if (incomingProduct.getStatus() != null &&
                 ProductStatusType.ACTIVE.getValue().equalsIgnoreCase(incomingProduct.getStatus().getValue())) {
@@ -140,7 +141,7 @@ public class SubscriptionManagementService {
             this.checkMaxActiveSubscriptions(buyerId);
         }
 
-        String offeringId = incomingProduct.getProductOffering().getId();
+//        String offeringId = incomingProduct.getProductOffering().getId();
         Product existingProduct = tmfDataRetriever.getProduct(incomingProduct.getId(), null);
         if (existingProduct == null) {
             //fixme: better exception
