@@ -1,7 +1,7 @@
-# OpenAPI definition
+# Subscriptions Management
 
-**Version:** v0  
-**Description:**   
+**Version:** 0.0.2  
+**Description:** Swagger REST APIs for the subscriptions-management software  
 
 
 ## REST API Endpoints
