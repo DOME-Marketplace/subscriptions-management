@@ -15,12 +15,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/management")
+@Tag(name = "Subscriptions Management Controller", description = "APIs to manage the subscriptions-management")
 public class SubscriptionManagementController {
 
     protected final Logger logger = LoggerFactory.getLogger(SubscriptionManagementController.class);
