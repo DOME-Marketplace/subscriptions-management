@@ -9,7 +9,7 @@ spring:
 #          issuer-uri: http://localhost:8080/realms/myrealm
 
 server:
-  port: 8680
+  port: 8080
   servlet:
     context-path: ${BILLING_PREFIX:/}
 
