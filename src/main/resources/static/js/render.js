@@ -166,7 +166,7 @@ export function renderPlanSelection(org, plans, onSelectPlan, container) {
                 share = Number(input.value);
                 if(isNaN(share)||share<0||share>100){ 
                     // alert("Enter a valid percentage (0-100)"); 
-                    showModalAlert("Enter a valida percentage", "You must enter a percentage between 0 and 100.");
+                    showModalAlert("Enter a valid percentage", "You must enter a percentage between 0 and 100.");
                     input.value="";
                     return; 
                 }
