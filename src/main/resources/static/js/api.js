@@ -18,8 +18,8 @@ export async function fetchPlans() {
     return await safeFetch(`${API_BASE}/management/productOffering/validPlans`);
 }
 
-export async function subscribeOrganization(orgId, planId, sharePercentage) {
-    const params = new URLSearchParams({ orgId, offeringId: planId });
+export async function subscribeOrganization(orgId, plan, sharePercentage) {
+    const params = new URLSearchParams({ orgId, offeringId: plan.id });
     if (sharePercentage != null) params.append("share", sharePercentage);
     return await safeFetch(`${API_BASE}/management/product/save?${params.toString()}`, { method: "POST" });
 }

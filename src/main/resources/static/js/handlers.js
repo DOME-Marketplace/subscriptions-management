@@ -35,15 +35,15 @@ export async function onAssignPlan(org) {
     render.renderPlanSelection(org, plans, onSelectPlan, render.qs("#plan-list"));
 }
 
-export function onSelectPlan(org, planId, share) {
-    render.renderConfirmSubscription(org, planId, share, onConfirmSubscription);
+export function onSelectPlan(org, plan, share) {
+    render.renderConfirmSubscription(org, plan, share, onConfirmSubscription);
 }
 
-export async function onConfirmSubscription(orgId, planId, share) {
+export async function onConfirmSubscription(orgId, plan, share) {
     const btn = render.qs("#confirm-modal-ok");
     btn.disabled = true; btn.textContent = "Loading...";
     try {
-        await api.subscribeOrganization(orgId, planId, share);
+        await api.subscribeOrganization(orgId, plan, share);
         render.renderOrganizationMenu(currentSelectedOrg, onCheckSubscription, onCheckOtherSub, onAssignPlan);
         render.showModalAlert("Success","Plan assigned successfully!");
     } catch(err) {

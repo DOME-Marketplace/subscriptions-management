@@ -26,13 +26,15 @@ export function showModalAlert(title, message, onOk) {
     };
 }
 
-export function renderConfirmSubscription(org, planId, share, onConfirm) {
+export function renderConfirmSubscription(org, plan, share, onConfirm) {
     const modal = qs("#confirm-modal");
     const body = qs("#confirm-modal-body");
 
     body.innerHTML = `
         <p><strong>Organization:</strong> ${org.tradingName}</p>
-        <p><strong>Plan ID:</strong> ${planId}</p>
+        <p><strong>Organization ID:</strong> ${org.id}</p>
+        <p><strong>Plan:</strong> ${plan.name}</p>
+        <p><strong>Plan ID:</strong> ${plan.id}</p>
         ${share != null ? `<p><strong>Revenue Sharing:</strong> ${share}%</p>` : ""}
     `;
     modal.style.display = "flex";
@@ -47,7 +49,7 @@ export function renderConfirmSubscription(org, planId, share, onConfirm) {
     };
 
     cancelBtn.onclick = close;
-    okBtn.onclick = () => { close(); onConfirm && onConfirm(org.id, planId, share); };
+    okBtn.onclick = () => { close(); onConfirm && onConfirm(org.id, plan, share); };
 }
 
 // ==========================
@@ -91,7 +93,7 @@ export function renderSubscription(orgId, products, infoDiv, updateCallback, upd
         div.innerHTML = `
             <h3>${p.name}</h3>
             <p><strong>ID:</strong> ${p.id}</p>
-            <p><strong>Activation Date:</strong> ${p.startDate}</p>
+            <p><strong>Activation Date:</strong> ${new Date(p.startDate).toLocaleDateString()}</p>
             <p>
                 <strong>Status:</strong>
                 <select class="status-select" data-sub-id="${p.id}" disabled>
@@ -147,7 +149,7 @@ export function renderPlanSelection(org, plans, onSelectPlan, container) {
     }
 
     plans.forEach(plan => {
-        const isFederated = plan.name.toLowerCase().includes("federated");
+        const isFederated = plan.name.toLowerCase().includes("federated") || plan.name.toLowerCase().includes("fms");
         const div = ce("div","plan-card");
         div.innerHTML = `
             <h4>${plan.name}</h4>
@@ -162,9 +164,14 @@ export function renderPlanSelection(org, plans, onSelectPlan, container) {
             if(isFederated){
                 const input = div.querySelector(".rev-input");
                 share = Number(input.value);
-                if(isNaN(share)||share<0||share>100){ alert("Enter a valid percentage (0-100)"); return; }
+                if(isNaN(share)||share<0||share>100){ 
+                    // alert("Enter a valid percentage (0-100)"); 
+                    showModalAlert("Enter a valida percentage", "You must enter a percentage between 0 and 100.");
+                    input.value="";
+                    return; 
+                }
             }
-            onSelectPlan(org, plan.id, share);
+            onSelectPlan(org, plan, share);
         });
     });
 }
