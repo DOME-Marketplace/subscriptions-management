@@ -1,6 +1,5 @@
 package it.eng.dome.subscriptions.management.controller;
 
-import it.eng.dome.tmforum.tmf620.v4.model.ProductOffering;
 import it.eng.dome.tmforum.tmf632.v4.model.Organization;
 import it.eng.dome.tmforum.tmf637.v4.model.Product;
 import it.eng.dome.subscriptions.management.exception.BadSubscriptionException;
