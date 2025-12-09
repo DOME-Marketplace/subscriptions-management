@@ -56,13 +56,13 @@ export async function subscribeToPlan(org, plan, characteristics) {
 
 // update the the given subscription
 export async function updateSubscription(org, updatedSubscription) {
-    // FIXME: should be a PATCH
-    // FIXME: the path should be /organizations/${orgId}/subscription/<subId>
-    return await safeFetch(`${API_BASE}/management/subscription/update?orgId=${org.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedSubscription)
-    });
+    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscription/${updatedSubscription.id}`, 
+            {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedSubscription)
+        }
+    );
 }
 
 export async function fetchAllowedStatuses() {
