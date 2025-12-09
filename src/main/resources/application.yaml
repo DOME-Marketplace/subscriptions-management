@@ -46,7 +46,7 @@ management:
 
 #TMF API Configuration
 tmforumapi:
-  tmf_endpoint: ${TMF_ENDPOINT:https://tmf.dome-marketplace-sbx.org}
+  tmf_endpoint: ${TMF_ENDPOINT:https://tmf.dome-marketplace-dev2.org}
   tmf_envoy:  ${TMF_ENVOY:true}
   # valid only if envoy false
   tmf_namespace:  ${TMF_NAMESPACE:marketplace}
@@ -59,7 +59,7 @@ tmforumapi:
   tmf666_account_management_path: tmf-api/accountManagement/v4
 
 bae:
-  bae_endpoint: ${BAE_ENDPOINT:https://dome-marketplace-sbx.org}
+  bae_endpoint: ${BAE_ENDPOINT:https://dome-marketplace-dev2.org}
 
 subscription:
   max_active_subscriptions: ${MAX_ACTIVE_SUBSCRIPTIONS:1}
