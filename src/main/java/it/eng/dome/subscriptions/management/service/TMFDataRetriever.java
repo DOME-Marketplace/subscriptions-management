@@ -15,6 +15,8 @@ import it.eng.dome.tmforum.tmf666.v4.ApiException;
 import it.eng.dome.tmforum.tmf666.v4.model.BillingAccount;
 import it.eng.dome.subscriptions.management.exception.BadTmfDataException;
 import it.eng.dome.subscriptions.management.exception.ExternalServiceException;
+import it.eng.dome.subscriptions.management.model.Plan;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -265,6 +267,44 @@ public class TMFDataRetriever {
                     }
 
                     consumer.accept(po);
+
+                } catch (Exception e) {
+                    logger.warn("Failed to process ProductOffering {}: {}", po.getId(), e.getMessage(), e);
+                }
+            });
+
+        } catch (Exception e) {
+            logger.error("Failed to fetch valid plans", e);
+            throw new ExternalServiceException("Failed to fetch valid plans", e);
+        }
+    }
+
+    public void fetchAvailablePlans(int batchSize, Consumer<Plan> consumer) throws ExternalServiceException {
+        try {
+            this.fetchProductOfferings(null, Map.of("category.name", "DOME OPERATOR Plan"), batchSize, po -> {
+                try {
+
+                    if (!"Launched".equalsIgnoreCase(po.getLifecycleStatus())) {
+                        return;
+                    }
+
+                    Plan plan = new Plan();
+
+                    OffsetDateTime now = OffsetDateTime.now();
+                    if (po.getValidFor() != null) {
+                        OffsetDateTime start = po.getValidFor().getStartDateTime();
+                        OffsetDateTime end = po.getValidFor().getEndDateTime();
+                        if (start != null && start.isAfter(now)) return;
+                        if (end != null && end.isBefore(now)) return;
+                    }
+
+                    plan.setDescription(po.getDescription());
+                    plan.setName(po.getName());
+                    plan.setOfferingId(po.getId());
+                    // TODO: consider also product offering prices
+                    plan.setOfferingPriceId(null);
+                    
+                    consumer.accept(plan);
 
                 } catch (Exception e) {
                     logger.warn("Failed to process ProductOffering {}: {}", po.getId(), e.getMessage(), e);

@@ -45,7 +45,7 @@ export function renderConfirmActivation(org, plan, characteristics, onConfirmFn)
         <p><strong>Organization:</strong> ${org.tradingName}</p>
         <p><strong>Organization ID:</strong> ${org.id}</p>
         <p><strong>Plan:</strong> ${plan.name}</p>
-        <p><strong>Plan ID:</strong> ${plan.id}</p>
+        <p><strong>Plan ID:</strong> ${plan.offeringId}</p>
         <br/>`;
         
     for(var key in characteristics) {
@@ -54,14 +54,14 @@ export function renderConfirmActivation(org, plan, characteristics, onConfirmFn)
 
     modal.style.display = "flex";
 
-    const cancelBtn = qs("#confirm-modal-cancel");
+    const cancelBtn = modal.querySelector("#confirm-modal-cancel");
     cancelBtn.onclick = () => {
             modal.style.display = "none";
             okBtn.onclick = null;
             cancelBtn.onclick = null;
         };
 
-    const okBtn = qs("#confirm-modal-ok");
+    const okBtn = modal.querySelector("#confirm-modal-ok");
     okBtn.onclick = () => {
             close(); 
             onConfirmFn && onConfirmFn(org, plan, characteristics); 
@@ -112,7 +112,15 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
     const subscriptionCard = cn("#subscription-template");
     subscriptionCard.querySelector("#name").innerHTML = subscription.name;
     subscriptionCard.querySelector("#id").innerHTML = subscription.id;
-    subscriptionCard.querySelector("#startDate").innerHTML = new Date(subscription.startDate).toLocaleDateString();
+    subscriptionCard.querySelector("#activationDate").innerHTML = new Date(subscription.startDate).toLocaleDateString();
+    if(subscription.terminationDate) {
+        subscriptionCard.querySelector("#terminationDateContainer").style.display="";
+        subscriptionCard.querySelector("#terminationDate").innerHTML = new Date(subscription.terminationDate).toLocaleDateString();
+    }
+    else {
+        subscriptionCard.querySelector("#terminationDateContainer").style.display="none";
+
+    }
 
     let options = "";
     for(let key in config.statuses) {
@@ -231,7 +239,7 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
     const card = cn("#subscription-plan-template");
 
     // filling values
-    card.querySelector("#id").innerHTML = plan.id;
+    card.querySelector("#id").innerHTML = plan.offeringId;
     card.querySelector("#name").innerHTML = plan.name;
     card.querySelector("#description").innerHTML = plan.description ? plan.description : "[No description available]";
 
@@ -265,8 +273,8 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
 
     // link to the BAE
     card.querySelector("#link_to_dome").addEventListener("click", () => {
-        let url = config.baeEndpoint + "/search/" + plan.id;
-        window.open(url, plan.id);
+        let url = config.baeEndpoint + "/search/" + plan.offeringId;
+        window.open(url, plan.offeringId);
     });
 
     // enable the 'select' button
@@ -413,14 +421,10 @@ export function wireAssignButton(btn, planList, org, checkAvailablePlansFn) {
             btn.disabled = true;
             btn.textContent = "Loading...";
             try {
-                console.log(0);
-                console.log(org);
-                console.log(checkAvailablePlansFn);
                 await checkAvailablePlansFn(org);
                 planList.style.removeProperty("display");
                 btn.textContent = "Close";
             } catch(err) {
-                console.log(err);
                 showModalAlert("Failed to Load Plans", "Please try again or contact your administator (" + err +").");
                 btn.textContent = "Add";
             } finally {

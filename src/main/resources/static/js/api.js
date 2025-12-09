@@ -41,8 +41,8 @@ export async function fetchPlans() {
 export async function subscribeToPlan(org, plan, characteristics) {
     let subscription = { 
         organizationId: org.id,
-        productOfferingId: plan.id,
-        productOfferingPrice: null,
+        productOfferingId: plan.offeringId,
+        productOfferingPrice: plan.offeringPriceId,
         characteristics: characteristics
     };
     return await safeFetch(`${API_BASE}/organizations/${org.id}/subscription`, 
@@ -70,9 +70,7 @@ export async function fetchAllowedStatuses() {
 }
 
 export async function fetchConfiguration() {
-    //  TODO: implement the following in REST. Maybe only for the last parameter. Let's keep the statuses here.
-    //    return await safeFetch(`${API_BASE}/management/configuration`);
-    return {
+    let localConfig = {
         statuses: {
             created: {
                 label: "Created",
@@ -123,12 +121,11 @@ export async function fetchConfiguration() {
                 allowedTransitions: []
             }
         },
-
-        finalStatuses: ["aborted", "canceled", "terminated"],
-
-        maxAllowedSubscriptions: 1,
-
-        baeEndpoint: "https://dome-marketplace-dev2.org"
-
+        finalStatuses : ["aborted", "canceled", "terminated"]
     }
+    let remoteConfig = await safeFetch(`${API_BASE}/configuration`);
+
+    let config = {...localConfig, ...remoteConfig};
+
+    return config;
 }

@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 //        const statuses = await api.fetchAllowedStatuses();
 //        render.setAllowedStatuses(statuses);
         render.setConfig(await api.fetchConfiguration());
+        handlers.setConfig(await api.fetchConfiguration());
 
         // ==========================
         // FETCH ORGANIZATIONS
