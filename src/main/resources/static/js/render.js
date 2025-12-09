@@ -7,6 +7,33 @@ export function setConfig(cfg) {
     config = cfg;
 }
 
+let currentEditor = null;
+
+export function acquireEditLock(who) {
+    if(currentEditor!=null && currentEditor!=who) {
+        currentEditor.style.animation = "pulse 2s infinite";
+        function stop() {
+            currentEditor.style.animation = "";
+        }
+        showModalAlert("Warning", "An editing session is ongoing.<br/>Please finalize or cancel it.", stop)
+        return false;
+    }
+    else {
+        currentEditor = who;
+        return true;
+    }
+}
+
+export function releaseEditLock(who) {
+    if(currentEditor == who) {
+        currentEditor = null;
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 // ==========================
 // UTILITY
 // ==========================
@@ -24,7 +51,7 @@ export function showModalAlert(title, message, onOk) {
     const overlay = qs("#modal-overlay");
     overlay.style.display = "flex";
     qs("#modal-title").textContent = title;
-    qs("#modal-message").textContent = message;
+    qs("#modal-message").innerHTML = message;
     const confirmBtn = qs("#modal-confirm");
     const cancelBtn = qs("#modal-cancel");
     cancelBtn.style.display = "none";
@@ -289,6 +316,8 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
 
     // react to click on 'select'
     card.querySelector("#select").addEventListener("click", () => {
+        if(!acquireEditLock(card))
+            return;
         // show configuration params
         card.querySelector("#characteristics").style.display="block";
         // reconfigure buttons visibility
@@ -299,6 +328,7 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
 
     // react to click on 'cancel'
     card.querySelector("#cancel").addEventListener("click", () => {
+        releaseEditLock(card);
         // hide configuration params
         card.querySelector("#characteristics").style.display="none";
         // reconfigure buttons visibility
@@ -371,6 +401,9 @@ export function renderPlans(org, plans, onPlanSelectedFn, container) {
 // OK
 export async function showOrganizationSubscriptions(org, checkCurrentSubscriptionFn, checkAvailablePlansFn) {
 
+    if(!acquireEditLock())
+        return;
+
     // some cleanup
     clear(qs("#message-panel"));
     clear(qs("#current-subscriptions-list"));
@@ -441,6 +474,8 @@ export function wireAssignButton(btn, planList, org, checkAvailablePlansFn) {
                 btn.disabled = false;
             }
         } else {
+            if(!acquireEditLock())
+                return;
             planList.style.display = "none";
             btn.textContent = "Add";
         }
