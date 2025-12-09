@@ -50,9 +50,7 @@ export async function checkAllSubscriptions(org, currentContainer, othersContain
 }
 
 export async function checkAvailablePlans(org) {
-    console.log("fetching plans...")
     const plans = await api.fetchPlans();
-    console.log(plans);
     render.renderPlans(org, plans, activatePlanFn, render.qs("#plan-list"));
 }
 

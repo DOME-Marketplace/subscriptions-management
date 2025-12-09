@@ -127,7 +127,5 @@ export async function fetchConfiguration() {
 
     let config = {...localConfig, ...remoteConfig};
 
-    console.log(config);
-
     return config;
 }

@@ -413,14 +413,10 @@ export function wireAssignButton(btn, planList, org, checkAvailablePlansFn) {
             btn.disabled = true;
             btn.textContent = "Loading...";
             try {
-                console.log(0);
-                console.log(org);
-                console.log(checkAvailablePlansFn);
                 await checkAvailablePlansFn(org);
                 planList.style.removeProperty("display");
                 btn.textContent = "Close";
             } catch(err) {
-                console.log(err);
                 showModalAlert("Failed to Load Plans", "Please try again or contact your administator (" + err +").");
                 btn.textContent = "Add";
             } finally {
