@@ -13,7 +13,7 @@
 	
 	<groupId>it.eng.dome.tool</groupId>
 	<artifactId>subscriptions-management</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<name>subscription-management</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -128,4 +128,15 @@
 		</plugins>
 	</build>
 
+ 	<profiles>
+	    <profile>
+	        <id>generate-rest-apis</id>
+	        <activation>
+	            <activeByDefault>false</activeByDefault>
+	        </activation>
+	        <properties>
+	            <spring-boot.run.arguments>--rest_api_docs.generate_md=true</spring-boot.run.arguments>
+	        </properties>
+	    </profile>
+	</profiles>
 </project>
