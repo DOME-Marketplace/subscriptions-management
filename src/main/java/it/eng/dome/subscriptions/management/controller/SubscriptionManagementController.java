@@ -6,6 +6,7 @@ import it.eng.dome.tmforum.tmf637.v4.model.Product;
 import it.eng.dome.subscriptions.management.exception.BadSubscriptionException;
 import it.eng.dome.subscriptions.management.exception.BadTmfDataException;
 import it.eng.dome.subscriptions.management.exception.ExternalServiceException;
+import it.eng.dome.subscriptions.management.model.Subscription;
 import it.eng.dome.subscriptions.management.service.SubscriptionManagementService;
 import it.eng.dome.subscriptions.management.service.TMFDataRetriever;
 import org.slf4j.Logger;
@@ -53,7 +54,19 @@ public class SubscriptionManagementController {
         }
     }
 
-    @GetMapping("/organizations/{organizationId}/purchasedProducts")
+    @GetMapping("/organizations/{organizationId}/subscriptions")
+    public ResponseEntity<?> listSubscriptions(@PathVariable String organizationId) {
+        try {
+            List<Product> products = this.managementService.getSubscriptionsByBuyerId(organizationId);
+            return ResponseEntity.ok(products);
+        } catch (ExternalServiceException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/organizations/{organizationId}/subscription/current")
     public ResponseEntity<?> listPurchasedProducts(@PathVariable String organizationId) {
         try {
             List<Product> products = this.managementService.getPurchasedProducts(organizationId);
@@ -65,7 +78,7 @@ public class SubscriptionManagementController {
         }
     }
 
-    @GetMapping("/organizations/{organizationId}/otherProducts")
+    @GetMapping("/organizations/{organizationId}/subscription/older")
     public ResponseEntity<?> getOtherProducts(@PathVariable String organizationId) {
         try {
             List<Product> all = managementService.getNotActiveSubscriptionForOrg(organizationId);
@@ -82,7 +95,7 @@ public class SubscriptionManagementController {
         }
     }
 
-    @GetMapping("/productOffering/validPlans")
+    @GetMapping("/plans/active")
     public ResponseEntity<List<ProductOffering>> listProductOfferingPlans() {
         try {
             List<ProductOffering> planPOs = this.managementService.getProductOfferingPlans();
@@ -94,48 +107,37 @@ public class SubscriptionManagementController {
         }
     }
 
-    @PostMapping("/product/save")
-    public ResponseEntity<?> saveProduct(
-            @RequestParam String orgId,
-            @RequestParam String offeringId,
-            @RequestParam(required = false) Double share
-    ) {
+    @PostMapping("/organizations/{organizationId}/subscription")
+    public ResponseEntity<String> saveProduct(@PathVariable String organizationId, @RequestBody Subscription subscription) {
         try {
-            String productId = managementService.saveProduct(orgId, offeringId, share);
+            String productId = managementService.createSubscription(subscription);
             return ResponseEntity.ok(productId);
         } catch (BadSubscriptionException | BadTmfDataException e) {
+            logger.error(e.getMessage(), e);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
         } catch (ExternalServiceException e) {
+            logger.error(e.getMessage(), e);
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(e.getMessage());
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Unexpected error: " + e.getMessage());
         }
     }
 
-    @GetMapping("/subscription/statuses")
-    public ResponseEntity<List<String>> getSubscriptionStatuses() {
-        try {
-            List<String> statuses = managementService.getProductStatuses();
-            return ResponseEntity.ok(statuses);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .build();
-        }
-    }
-
-    @PostMapping("/subscription/update")
+    @PatchMapping("/organizations/{organizationId}/subscription/{subscriptionId}")
     public ResponseEntity<?> updateProduct(
-            @RequestParam String orgId,
-            @RequestBody Product incomingProduct
+            @PathVariable String organizationId,
+            @PathVariable String subscriptionId,
+            @RequestBody Product subscription
     ) {
         try {
-            managementService.updateProduct(orgId, incomingProduct);
+            managementService.updateSubscription(organizationId, subscription);
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");
             response.put("message", "Product updated successfully!");
@@ -157,4 +159,16 @@ public class SubscriptionManagementController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
+
+    @GetMapping("/subscription/statuses")
+    public ResponseEntity<List<String>> getSubscriptionStatuses() {
+        try {
+            List<String> statuses = managementService.getProductStatuses();
+            return ResponseEntity.ok(statuses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build();
+        }
+    }
+
 }

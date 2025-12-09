@@ -10,6 +10,7 @@ import it.eng.dome.subscriptions.management.exception.BadSubscriptionException;
 import it.eng.dome.subscriptions.management.exception.BadTmfDataException;
 import it.eng.dome.subscriptions.management.exception.ExternalServiceException;
 import it.eng.dome.subscriptions.management.model.Role;
+import it.eng.dome.subscriptions.management.model.Subscription;
 import it.eng.dome.subscriptions.management.model.comparator.OrganizationComparator;
 import it.eng.dome.subscriptions.management.utils.RelatedPartyUtils;
 import org.slf4j.Logger;
@@ -36,6 +37,13 @@ public class SubscriptionManagementService {
         List<Organization> mutableOrgs = new ArrayList<>(orgs); // copy mutable list
         Collections.sort(mutableOrgs, new OrganizationComparator());
         return mutableOrgs;
+    }
+
+
+    public List<Product> getSubscriptionsByBuyerId(String buyerId) throws ExternalServiceException {
+        List<Product> all = new ArrayList<>();
+        tmfDataRetriever.fetchAllSubscription(10, buyerId, all::add);
+        return all;
     }
 
     public List<Product> getPurchasedProducts (String buyerId) throws ExternalServiceException {
@@ -85,7 +93,9 @@ public class SubscriptionManagementService {
         return planPOs;
     }
 
-    public String saveProduct(String buyerId, String offeringId, Double share)
+    /*
+    @Deprecated
+    private String saveProduct(String buyerId, String offeringId, Double share)
             throws BadTmfDataException, ExternalServiceException, ApiException {
 
         Organization buyer = tmfDataRetriever.getOrganization(buyerId);
@@ -98,6 +108,24 @@ public class SubscriptionManagementService {
 
         ProductBuilder builder = new ProductBuilder(tmfDataRetriever);
         ProductCreate pc = builder.build(offering, buyer, baRef, share);
+
+        return tmfDataRetriever.saveProduct(pc);
+    }
+    */
+
+    public String createSubscription(Subscription subscription) throws BadTmfDataException, ExternalServiceException, ApiException {
+        
+        Organization buyer = tmfDataRetriever.getOrganization(subscription.getOrganizationId());
+        ProductOffering offering = tmfDataRetriever.getProductOffering(subscription.getProductOfferingId(), null);
+        // TODO: also manage product offering price
+
+        //check max active subscriptions
+        this.checkMaxActiveSubscriptions(subscription.getOrganizationId());
+
+        BillingAccountRef baRef = this.getBillingAccountByOrganization(subscription.getOrganizationId());
+
+        ProductBuilder builder = new ProductBuilder(tmfDataRetriever);
+        ProductCreate pc = builder.build(offering, buyer, baRef, subscription.getCharacteristics());
 
         return tmfDataRetriever.saveProduct(pc);
     }
@@ -133,7 +161,7 @@ public class SubscriptionManagementService {
     }
 
     @SuppressWarnings("null")
-	public void updateProduct(String buyerId, Product incomingProduct)
+	public void updateSubscription(String buyerId, Product incomingProduct)
             throws ExternalServiceException, BadTmfDataException {
         if (incomingProduct.getStatus() != null &&
                 ProductStatusType.ACTIVE.getValue().equalsIgnoreCase(incomingProduct.getStatus().getValue())) {
@@ -147,7 +175,7 @@ public class SubscriptionManagementService {
             //fixme: better exception
             throw new BadTmfDataException("Product", existingProduct.getId(), "No existing valid product found to update");
         }
-        ProductUpdate update = buildProductUpdateFromProduct(incomingProduct);
+        ProductUpdate update = this.buildProductUpdateFromProduct(incomingProduct);
         tmfDataRetriever.updateProduct(existingProduct.getId(), update);
     }
 

@@ -16,9 +16,9 @@
     <nav class="top-navbar">
         <div class="nav-left">
             <a href="index.html">
-                <img src="media/dome-logo.svg" class="logo" alt="Logo" />
+                <img src="media/dome-logo.png" class="logo" alt="Logo" />
             </a>
-            <!-- <h1 class="app-title">Subscription Manager</h1> -->
+            <h1 class="app-title">Subscription Manager</h1>
         </div>
 
         <div class="nav-right">
@@ -34,40 +34,68 @@
         </div>
     </nav>
 
-    <div class="page-title">
-        Subscriptions Management
-    </div>
-
     <div class="layout">
-        <!-- SIDEBAR ORGANIZATIONS -->
-        <aside class="sidebar">
-            <h2>Organizations</h2>
+
+        <!-- left panel for organizations -->
+        <div class="sidebar">
+
+            <!-- title -->
+            <h2>Onboarded Organizations</h2>
+
+            <!-- organization list -->
             <div id="org-list" class="org-list">
                 <!-- Organizations loaded via JS -->
             </div>
-        </aside>
 
-        <!-- DETAILS -->
-        <main class="main">
+        </div>
+
+        <!-- main panel for subscriptions -->
+        <div class="main">
+
+            <!-- a message panel-->
+            <div id="message-panel" class="message-panel"></div>
+
+            <!-- selected organisation header-->
             <div id="org-header" class="org-header"></div>
 
-            <div class="subscriptions-container" id="subscriptions-container">
-                <!-- LEFT PANEL: Subscription Details -->
-                <div class="subscriptions-left">
-                    <div id="details-panel" class="details-panel">
-                        <!-- Details loaded via JS -->
-                         <p> Click on an organization to show its subscriptions.</p>
+            <div id="subscriptions-container" class="subscriptions-container">
+                <!-- Subscription List -->
+
+                <!-- current subscription> -->
+                <div id="active-subscription>">
+
+                    <!-- title -->
+                    <h3 class="section-title">Current Subscriptions</h3>
+
+                    <!-- subscription container -->
+                    <div id="current-subscriptions-list" class="subscription-list">
+                        <!-- subscriptions loaded via JS -->
+                    </div>
+
+                    <div class="plans-container">
+                        <!-- buttons -->
+                        <div id="plans-container-buttons" class="plans-container-buttons">
+                            <button id="btn-assign-plan"></button>
+                        </div>
+                        <!-- available plans -->
+                        <div id="plan-list" class="plan-list">
+                            <!-- plans loaded via JS -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- older subscriptions-->
+                <div id="other-subscriptions>">
+                    <!-- title -->
+                    <h3 class="section-title">Terminated Subscriptions</h3>
+                    <!-- subscriptions container -->
+                    <div id="other-subscriptions-info" class="subscription-list">
+                        <!-- subscriptions loaded via JS -->
                     </div>
                 </div>
-            
-                <!-- RIGHT PANEL: Assign Plan -->
-                <div class="subscriptions-right" id="assign-plan-panel" style="display:none;">
-                    <h3 class="section-title">Assign New Subscription</h3>
-                    <button id="btn-assign-plan"></button>
-                    <div id="plan-list" style="display:none"></div>
-                </div>
             </div>
-        </main>
+        </div>
     </div>
     
     <!-- MODAL OVERLAY -->
@@ -76,8 +104,8 @@
             <h3 id="modal-title"></h3>
             <p id="modal-message"></p>
 
-            <button id="modal-confirm" class="btn">OK</button>
-            <button id="modal-cancel" class="btn secondary">Cancel</button>
+            <button id="modal-confirm" >OK</button>
+            <button id="modal-cancel" class="secondary">Cancel</button>
         </div>
     </div>
 
@@ -89,9 +117,95 @@
                 <!-- Info aggiunte dinamicamente -->
             </div>
 
-            <button id="confirm-modal-ok" class="btn">Confirm</button>
-            <button id="confirm-modal-cancel" class="btn secondary">Cancel</button>
+            <button id="confirm-modal-ok">Confirm</button>
+            <button id="confirm-modal-cancel" class="secondary">Cancel</button>
         </div>
+    </div>
+
+    <!-- TEMPLATES -->
+    <div style="display:none">
+
+        <!-- the organisation card in the left menu -->
+        <div id="org-card-template" class="org-card">
+            <h3 id="tradingName"></h3>
+            <p id="id"></p>
+        </div>
+
+        <!-- the organisation header in the main panel -->
+        <div id="org-header-template">
+            <p class="org-header-title"><strong id="tradingName"></strong></p>
+            <small><strong>ID:</strong><span id="id"></span></small>
+        </div>
+
+        <!-- a card for a subscription -->
+        <div id="subscription-template" class="sub-card">
+            <h3 id="name"></h3>
+            <p><strong>ID: </strong><span id="id"></span></p>
+            <p><strong>Activation Date: </strong><span id="startDate"></span></p>
+            <div>
+                <button id="edit">Edit</button>
+                <button id="cancel" class="secondary">Cancel</button>
+                <button id="confirm">Confirm</button>
+            </div>
+            <p>
+                <strong>Status:</strong>
+                <span id="statusLabel" style="display:none"></span>
+                <select class="status-select" data-sub-id="${p.id}" disabled id="statusOptions" style="display:none">
+                </select>
+            </p>
+        </div>
+
+        <!-- a card for a subscription plan to chose among -->
+        <div id="subscription-plan-template" class="plan-card">
+
+            <!-- subscription metadata-->
+            <h4><span id="name"></span></h4>
+            <p id="id"></p>
+            <p id="description"></p>
+
+            <!-- filler -->
+            <div style="flex:1; overflow:auto"></div>
+            
+            <!-- characteristics-->
+            <div id="characteristics" style="display:none"></div>
+
+            <!-- filler -->
+            <div style="flex:1; overflow:auto"></div>
+
+            <span id="link_to_dome">View in DOME <img src="https://upload.wikimedia.org/wikipedia/commons/2/25/External.svg" style="height:10pt"> </span>
+
+            <!-- actions -->
+            <div>
+                <button id="select" style="display:none">Select</button>
+                <button id="proceed" style="display:none">Next</button>
+                <button id="cancel" style="display:none">Cancel</button>
+            </div>
+
+        </div>
+
+        <!-- percentage editor -->
+        <div id="percentage-editor-template" style="display:none">
+            <label id="label"></label>
+            <input id="value" placeholder="0" style="width:40pt; text-align:right">
+        </div>
+
+        <!-- date editor -->
+        <div id="date-editor-template" style="display:none">
+            <label id="label"></label>
+            <input id="value" type="date"/>
+        </div>
+
+        <!-- boolean editor -->
+        <div id="boolean-editor-template" style="display:none">
+            <input id="value" type="checkbox"/>
+            <label id="label"></label>
+        </div>
+
+        <!-- an embedded message -->
+        <div id="nested-message-template" class="nested-message">
+            <p id="message"></p>
+        </div>
+
     </div>
 
     <!-- JS -->

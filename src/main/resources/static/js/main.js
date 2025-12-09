@@ -36,29 +36,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         // ==========================
         // FETCH ALLOWED STATUSES
         // ==========================
-        const statuses = await api.fetchAllowedStatuses();
-        render.setAllowedStatuses(statuses);
+//        const statuses = await api.fetchAllowedStatuses();
+//        render.setAllowedStatuses(statuses);
+        render.setConfig(await api.fetchConfiguration());
 
         // ==========================
         // FETCH ORGANIZATIONS
         // ==========================
-        const orgs = await api.fetchOrganizations();
-        render.renderOrganizationsList(orgs, org => {
-            try{
-                handlers.setCurrentSelectedOrg(org);
-                render.renderOrganizationMenu(
-                    org, 
-                    handlers.onCheckSubscription, 
-                    handlers.onCheckOtherSub, 
-                    handlers.onAssignPlan
-                );
-            }
-            catch(err){
-                console.error("Error rendering organization");
-                render.showModalAlert("Failed to load organization details","Please try again or contact your administator.")
-            }
-            
-        });
+        handlers.init();
 
     } catch(err){
         render.showModalAlert("Unexpected error", "Please try again or contact your administator (" + err.message + ").");

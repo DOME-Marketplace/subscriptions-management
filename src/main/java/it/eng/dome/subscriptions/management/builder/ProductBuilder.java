@@ -13,6 +13,7 @@ import it.eng.dome.subscriptions.management.utils.TMFUtils;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ProductBuilder {
 
@@ -23,9 +24,9 @@ public class ProductBuilder {
     }
 
     public ProductCreate build(ProductOffering offering,
-                               Organization buyer,
-                               BillingAccountRef baRef,
-                               Double revenueShare)
+                                Organization buyer,
+                                BillingAccountRef baRef,
+                                Map<String, String> characteristics)
             throws BadTmfDataException, ExternalServiceException {
 
         ProductCreate product = new ProductCreate();
@@ -36,7 +37,7 @@ public class ProductBuilder {
         product.setStatus(ProductStatusType.ACTIVE);
 
         // --- Characteristics ---
-        product.setProductCharacteristic(buildCharacteristics(revenueShare));
+        product.setProductCharacteristic(buildCharacteristics(characteristics));
 
         // --- Offering ref ---
         product.setProductOffering(TMFUtils.toProductOfferingRef(offering));
@@ -50,20 +51,17 @@ public class ProductBuilder {
         return product;
     }
 
-    private List<Characteristic> buildCharacteristics(Double revenueShare) {
+    private List<Characteristic> buildCharacteristics(Map<String, String> characteristics) {
         List<Characteristic> chars = new ArrayList<>();
 
-        if (revenueShare != null) {
-            Characteristic revenue = new Characteristic();
-            revenue.setName("revenuePercentage");
-            revenue.setValue(revenueShare);
-
-            Characteristic federated = new Characteristic();
-            federated.setName("marketplaceSubscription");
-            federated.setValue(true);
-
-            chars.add(revenue);
-            chars.add(federated);
+        for(String key: characteristics.keySet()) {
+            String value = characteristics.get(key);
+            if (key != null && value!=null) {
+                Characteristic c = new Characteristic();
+                c.setName(key);
+                c.setValue(value);
+                chars.add(c);
+            }
         }
 
         return chars;
