@@ -1,16 +1,25 @@
 let allowedStatuses = [];
 export function setAllowedStatuses(statuses) { allowedStatuses = statuses; }
 
+let config = null;
+
+export function setConfig(cfg) {
+    config = cfg;
+}
+
 // ==========================
 // UTILITY
 // ==========================
 export function qs(selector) { return document.querySelector(selector); }
 export function ce(tag, cls) { const e = document.createElement(tag); if(cls) e.className = cls; return e; }
 export function clear(el) { el.innerHTML = ""; }
+export function cn(id, cls) { const n = qs(id).cloneNode(true); n.removeAttribute("id"); if(cls) n.className = cls; return n; }
 
 // ==========================
 // MODALS
 // ==========================
+
+// OK
 export function showModalAlert(title, message, onOk) {
     const overlay = qs("#modal-overlay");
     overlay.style.display = "flex";
@@ -26,7 +35,9 @@ export function showModalAlert(title, message, onOk) {
     };
 }
 
-export function renderConfirmSubscription(org, plan, share, onConfirm) {
+// OK
+export function renderConfirmActivation(org, plan, characteristics, onConfirmFn) {
+
     const modal = qs("#confirm-modal");
     const body = qs("#confirm-modal-body");
 
@@ -35,111 +46,296 @@ export function renderConfirmSubscription(org, plan, share, onConfirm) {
         <p><strong>Organization ID:</strong> ${org.id}</p>
         <p><strong>Plan:</strong> ${plan.name}</p>
         <p><strong>Plan ID:</strong> ${plan.id}</p>
-        ${share != null ? `<p><strong>Revenue Sharing:</strong> ${share}%</p>` : ""}
-    `;
+        <br/>`;
+        
+    for(var key in characteristics) {
+        body.innerHTML += `<p><strong>${key}:</strong> ${characteristics[key]}</p>`
+    }
+
     modal.style.display = "flex";
 
-    const okBtn = qs("#confirm-modal-ok");
     const cancelBtn = qs("#confirm-modal-cancel");
+    cancelBtn.onclick = () => {
+            modal.style.display = "none";
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+        };
 
-    const close = () => {
-        modal.style.display = "none";
-        okBtn.onclick = null;
-        cancelBtn.onclick = null;
-    };
-
-    cancelBtn.onclick = close;
-    okBtn.onclick = () => { close(); onConfirm && onConfirm(org.id, plan, share); };
+    const okBtn = qs("#confirm-modal-ok");
+    okBtn.onclick = () => {
+            close(); 
+            onConfirmFn && onConfirmFn(org, plan, characteristics); 
+        };
 }
 
 // ==========================
 // ORGANIZATIONS
 // ==========================
-export function renderOrganizationsList(orgs, onSelectOrg) {
+
+// OK
+export function renderOrganizationsList(orgs, onOrganizationSelectedFn) {
     const list = qs("#org-list");
     clear(list);
     orgs.forEach(org => {
-        const card = ce("div","org-card");
-        card.innerHTML = `<h3>${org.tradingName}</h3><p>ID: ${org.id}</p>`;
-        card.addEventListener("click", () => onSelectOrg(org));
+        const card = cn("#org-card-template");
+        card.querySelector("#tradingName").innerHTML = org.tradingName;
+        card.querySelector("#id").innerHTML = org.id;
+        card.addEventListener("click", () => onOrganizationSelectedFn(org));
         list.appendChild(card);
     });
 }
 
+// OK
 export function updateSelectedOrgHeader(org) {
-    const headerDiv = qs("#org-header");
-    headerDiv.style.display = "block";
-    headerDiv.innerHTML = `
-        <h3 class="org-header-title">Selected Organization</h3>
-        <p><strong>${org.tradingName}</strong></p>
-        <small><strong>ID:</strong> ${org.id}</small>
-    `;
+    const a = qs("#org-header");   // FIXMe rename to org-header-container
+    const msg = qs("#message-panel");
+    if(org) {
+        msg.style.display="none";
+        a.style.display="block";
+        clear(a);
+        const orgHeader = cn("#org-header-template");
+        orgHeader.querySelector("#tradingName").innerHTML = org.tradingName;
+        orgHeader.querySelector("#id").innerHTML = org.id;
+        a.appendChild(orgHeader);
+    }
+    else {
+        msg.style.display="block";
+        a.style.display="none";
+        msg.innerHTML = "<p>Select an Organization to view its Subscriptions</p>";
+    }
 }
 
-// Render subscriptions
-export function renderSubscription(orgId, products, infoDiv, updateCallback, updateProductFunc) {
-    clear(infoDiv);
-    if (!products || products.length === 0) {
-        const div = ce("div","sub-card");
-        div.innerHTML = "<p>No subscriptions.</p>";
-        infoDiv.appendChild(div);
-        return;
+// OK
+export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, updateSubscriptionFn) {
+
+    // prepare the card
+    const subscriptionCard = cn("#subscription-template");
+    subscriptionCard.querySelector("#name").innerHTML = subscription.name;
+    subscriptionCard.querySelector("#id").innerHTML = subscription.id;
+    subscriptionCard.querySelector("#startDate").innerHTML = new Date(subscription.startDate).toLocaleDateString();
+
+    let options = "";
+    for(let key in config.statuses) {
+        let status = config.statuses[key];
+        let value = status.value;
+        let selected = (value==subscription.status);
+        let disabled = !config.statuses[subscription.status].allowedTransitions.includes(value);
+        options += `<option value="${value}" ${selected?"selected":""} ${disabled?"disabled":""}>${status.label}</option>`;
     }
+    subscriptionCard.querySelector("#statusOptions").innerHTML = options;
+    subscriptionCard.querySelector("#statusLabel").innerHTML = config.statuses[subscription.status].label + " - " + config.statuses[subscription.status].description;
 
-    products.forEach(p => {
-        const div = ce("div","sub-card");
-        const statusOptions = allowedStatuses.map(s => `<option value="${s}" ${s===p.status?"selected":""}>${s}</option>`).join("");
+    subscriptionCard.classList.add(subscription.status);
 
-        div.innerHTML = `
-            <h3>${p.name}</h3>
-            <p><strong>ID:</strong> ${p.id}</p>
-            <p><strong>Activation Date:</strong> ${new Date(p.startDate).toLocaleDateString()}</p>
-            <p>
-                <strong>Status:</strong>
-                <select class="status-select" data-sub-id="${p.id}" disabled>
-                    ${statusOptions}
-                </select>
-                <button class="edit-btn btn small">Edit</button>
-            </p>
-            <div class="action-buttons" style="margin-top:6px; display:none;">
-                <button class="confirm-btn btn small">Confirm</button>
-                <button class="cancel-btn btn small secondary">Cancel</button>
-            </div>
-        `;
-        infoDiv.appendChild(div);
+    // retrieve controls
+    const select = subscriptionCard.querySelector("#statusOptions");
+    const statusLabel = subscriptionCard.querySelector("#statusLabel");
+    const editBtn = subscriptionCard.querySelector("#edit");
+    //const actionBtns = div.querySelector(".action-buttons");
+    const confirmBtn = subscriptionCard.querySelector("#confirm");
+    const cancelBtn = subscriptionCard.querySelector("#cancel");
 
-        const select = div.querySelector(".status-select");
-        const editBtn = div.querySelector(".edit-btn");
-        const actionBtns = div.querySelector(".action-buttons");
-        const confirmBtn = div.querySelector(".confirm-btn");
-        const cancelBtn = div.querySelector(".cancel-btn");
+    if(config.finalStatuses.includes(subscription.status)) {
+        // just disable all actions
+        statusLabel.style.display="";
+        editBtn.style.display="none"; 
+        confirmBtn.style.display="none"; 
+        cancelBtn.style.display="none"; 
+    }
+    else {
+        // enable actions
+        statusLabel.style.display="";
+        editBtn.style.display=""; 
+        confirmBtn.style.display="none"; 
+        cancelBtn.style.display="none"; 
 
-        editBtn.addEventListener("click", () => { select.disabled=false; actionBtns.style.display="block"; editBtn.style.display="none"; });
-        cancelBtn.addEventListener("click", () => { select.value=p.status; select.disabled=true; actionBtns.style.display="none"; editBtn.style.display="inline-block"; });
+        editBtn.addEventListener("click", () => { 
+                select.disabled=false; 
+                select.style.removeProperty("display");
+                statusLabel.style.display="none";
+                confirmBtn.style.display=""; 
+                cancelBtn.style.display=""; 
+                editBtn.style.display="none"; 
+            }
+        );
+
+        cancelBtn.addEventListener("click", () => {
+                select.value=subscription.status; 
+                select.disabled=true; 
+                statusLabel.style.removeProperty("display");
+                select.style.display="none";
+                confirmBtn.style.display="none"; 
+                cancelBtn.style.display="none"; 
+                editBtn.style.display=""; 
+            }
+        );
 
         confirmBtn.addEventListener("click", async () => {
-            const newStatus = select.value;
-            confirmBtn.disabled = true;
-            cancelBtn.disabled = true;
-            try {
-                const updatedProduct = { ...p, status:newStatus };
-                await updateProductFunc(orgId, updatedProduct);
-                p.status = newStatus;
-                select.disabled=true; actionBtns.style.display="none"; editBtn.style.display="inline-block";
-                updateCallback(orgId); // aggiorna il menu se serve
-                showModalAlert("Success","Subscription updated successfully!");
-            } catch(err) {
-                showModalAlert("Error","Subscription update failed: "+err.message);
-                select.value=p.status; select.disabled=true; actionBtns.style.display="none"; editBtn.style.display="inline-block";
-            } finally { confirmBtn.disabled=false; cancelBtn.disabled=false; }
-        });
-    });
+                const newStatus = select.value;
+                confirmBtn.disabled = true;
+                cancelBtn.disabled = true;
+                try {
+                    const updatedProduct = { ...subscription, status:newStatus };
+                    await updateSubscriptionFn(org, updatedProduct);
+                    subscription.status = newStatus;
+                    select.disabled=true;
+                    cancelBtn.style.display="none"; 
+                    confirmBtn.style.display="none"; 
+                    editBtn.style.display="";
+                    showModalAlert("Success", "Subscription updated successfully!");
+                    onSuccessfulUpdateFn(org);
+                } catch(err) {
+                    showModalAlert("Error" ,"Subscription update failed: "+err.message);
+                    select.value=subscription.status; 
+                    select.disabled=true; 
+                    cancelBtn.style.display="none"; 
+                    confirmBtn.style.display="none"; 
+                    editBtn.style.display="";
+                } finally { 
+                    confirmBtn.disabled=true; 
+                    cancelBtn.disabled=true; 
+                }
+            }
+        );    
+    }
+    return subscriptionCard;
 }
 
-// Render plan selection
-export function renderPlanSelection(org, plans, onSelectPlan, container) {
+// OK
+export function renderSubscriptions(org, subscriptions, container, onSuccessfulUpdateFn, updateSubscriptionFn) {
+
+    clear(container);
+
+    // no subscriptions => display message and return
+    if (!subscriptions || subscriptions.length === 0) {
+        const messageBox = cn("#nested-message-template", "nested-message");
+        messageBox.querySelector("#message").innerHTML = "No subscriptions found";
+        container.appendChild(messageBox);
+        return;
+    }
+    // otherwise, show the subscription
+    else {
+        container.display="";
+        subscriptions.forEach(subscription => {
+            let subscriptionCard = buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, updateSubscriptionFn);
+            container.appendChild(subscriptionCard);
+        });
+    }
+
+}
+
+// OK
+export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
+
+    // create the card
+    const card = cn("#subscription-plan-template");
+
+    // filling values
+    card.querySelector("#id").innerHTML = plan.id;
+    card.querySelector("#name").innerHTML = plan.name;
+    card.querySelector("#description").innerHTML = plan.description ? plan.description : "[No description available]";
+
+    // add configurable properties
+    for(let char of plan.configurableCharacteristics) {
+        if(char.type=="percentage") {
+            let editor = cn("#percentage-editor-template");
+            editor.style.display=char.hide ? "none": "block";
+            editor.querySelector("#label").innerHTML = char.label;
+            editor.querySelector("#value").id = char.key;
+            card.querySelector("#characteristics").appendChild(editor);
+        }
+        else if(char.type=="boolean") {
+            let editor = cn("#boolean-editor-template");
+            editor.style.display=char.hide ? "none": "block";
+            editor.querySelector("#label").innerHTML = char.label;
+            editor.querySelector("#value").checked = char.value;
+            editor.querySelector("#value").value = true;
+            editor.querySelector("#value").id = char.key;
+            card.querySelector("#characteristics").appendChild(editor);
+        }
+        else if(char.type=="date") {
+            let editor = cn("#date-editor-template");
+            editor.style.display=char.hide ? "none": "block";
+            editor.querySelector("#label").innerHTML = char.label;
+            editor.querySelector("#value").id = char.key;
+            card.querySelector("#characteristics").appendChild(editor);
+        }
+    }
+
+    // link to the BAE
+    card.querySelector("#link_to_dome").addEventListener("click", () => {
+        let url = config.baeEndpoint + "/search/" + plan.id;
+        window.open(url, plan.id);
+    });
+
+    // enable the 'select' button
+    card.querySelector("#select").style.display="block";
+
+    // react to click on 'select'
+    card.querySelector("#select").addEventListener("click", () => {
+        // show configuration params
+        card.querySelector("#characteristics").style.display="block";
+        // reconfigure buttons visibility
+        card.querySelector("#select").style.display="none";
+        card.querySelector("#proceed").style.display="block";
+        card.querySelector("#cancel").style.display="block";
+    });
+
+    // react to click on 'cancel'
+    card.querySelector("#cancel").addEventListener("click", () => {
+        // hide configuration params
+        card.querySelector("#characteristics").style.display="none";
+        // reconfigure buttons visibility
+        card.querySelector("#select").style.display="block";
+        card.querySelector("#proceed").style.display="none";
+        card.querySelector("#cancel").style.display="none";
+    });
+
+    // hooking an action to the button
+    card.querySelector("#proceed").addEventListener("click", () => {
+
+        let subscriptionConfiguration = {};
+
+        // validate characteristics
+        for(let char of plan.configurableCharacteristics) {
+            let key = char.key;
+            let value = card.querySelector("#characteristics").querySelector("#"+key).value;
+            if(char.type=="percentage") {
+                if(isNaN(value) || value<0 || value>100){ 
+                    showModalAlert("Invalid percentage: " + value + "%", "Please enter a percentage between 0 and 100");
+                    return; 
+                }
+            }
+            else if(char.type=="date") {
+                let date = Date.parse(value);
+                if(isNaN(date)) {
+                    showModalAlert("Invalid " + char.label, "Please enter an " + char.label);
+                    return; 
+                }
+            }
+            else if(char.type=="boolean") {
+                if(value!="true" && value!="false") {
+                    showModalAlert("Invalid value for " + char.label);
+                    return; 
+                }
+            }
+            subscriptionConfiguration[key] = value;   
+        }
+
+        // then activate the plan
+        activatePlanFn(org, plan, subscriptionConfiguration);
+    });
+
+    return card;
+}
+
+// OK
+export function renderPlans(org, plans, onPlanSelectedFn, container) {
+
+    // clean the container
     clear(container);
     
+    // no plans available
     if (!plans || plans.length === 0) {
         const div = ce("div", "no-plans-card");
         div.innerHTML = `<p>No plans available.</p>`;
@@ -149,61 +345,39 @@ export function renderPlanSelection(org, plans, onSelectPlan, container) {
     }
 
     plans.forEach(plan => {
-        const isFederated = plan.name.toLowerCase().includes("federated") || plan.name.toLowerCase().includes("fms");
-        const div = ce("div","plan-card");
-        div.innerHTML = `
-            <h4>${plan.name}</h4>
-            <p><strong>ID:</strong> ${plan.id}</p>
-            <p><strong>Description:</strong> ${plan.description || "No description available"}</p>
-            ${isFederated?`<div class="input-group"><label>Revenue Sharing (%)</label><input type="number" class="rev-input" min="0" max="100" placeholder="0-100" style="width:120px;"></div>`:""}
-            <button class="btn small select-plan" data-plan="${plan.id}">Select</button>
-        `;
-        container.appendChild(div);
-        div.querySelector(".select-plan").addEventListener("click", () => {
-            let share = null;
-            if(isFederated){
-                const input = div.querySelector(".rev-input");
-                share = Number(input.value);
-                if(isNaN(share)||share<0||share>100){ 
-                    // alert("Enter a valid percentage (0-100)"); 
-                    showModalAlert("Enter a valid percentage", "You must enter a percentage between 0 and 100.");
-                    input.value="";
-                    return; 
-                }
-            }
-            onSelectPlan(org, plan, share);
-        });
+        const card = buildSubscriptionPlanCard(org, plan, onPlanSelectedFn);
+        container.appendChild(card);
     });
+
 }
 
-// render.js
-export async function renderOrganizationMenu(org, onCheckSubscription, onCheckOtherSub, onAssignPlan) {
-    const panel = qs("#details-panel");
-    clear(panel);
 
+// OK
+export async function showOrganizationSubscriptions(org, checkCurrentSubscriptionFn, checkAvailablePlansFn) {
+
+    // some cleanup
+    clear(qs("#message-panel"));
+    clear(qs("#current-subscriptions-list"));
+    clear(qs("#other-subscriptions-info"));
+
+    qs("#current-subscriptions-list").innerHTML = "loading...";
+    qs("#other-subscriptions-info").innerHTML = "loading...";
+
+    // update the header
     updateSelectedOrgHeader(org);
 
-    // LEFT PANEL: Active Subscriptions
-    const activeSubDiv = ce("div");
-    activeSubDiv.innerHTML = `
-        <h3 class="section-title">Active Subscriptions</h3>
-        <div id="subscription-info"></div>
-    `;
-    panel.appendChild(activeSubDiv);
+    if(!org)
+        return;
 
-    const otherSubDiv = ce("div");
-    otherSubDiv.innerHTML = `
-        <h3 class="section-title">Other Subscriptions</h3>
-        <div id="other-subscriptions-info"></div>
-    `;
-    panel.appendChild(otherSubDiv);
+    // activate the panel
+    qs("#subscriptions-container").style.display="block";
 
     // RIGHT PANEL: Assign Plan
-    const rightPanel = qs("#assign-plan-panel");
+    const plansContainerButtons = qs("#plans-container-buttons");
     const planList = qs("#plan-list");
     const btnAssign = qs("#btn-assign-plan");
 
-    rightPanel.style.display = "none";
+    plansContainerButtons.style.display = "none";
     planList.innerHTML = "";
     planList.style.display = "none";
 
@@ -211,18 +385,19 @@ export async function renderOrganizationMenu(org, onCheckSubscription, onCheckOt
     const newBtn = btnAssign.cloneNode(true);
     btnAssign.replaceWith(newBtn);
 
-    newBtn.textContent = "➕ Add new subscription";
+    newBtn.textContent = "Add";
     newBtn.disabled = false;
 
     try {
-        const [activeProducts, otherProducts] = await Promise.all([
-            onCheckSubscription(org.id, activeSubDiv.querySelector("#subscription-info")),
-            onCheckOtherSub(org.id, otherSubDiv.querySelector("#other-subscriptions-info"))
+
+        const [subs] = await Promise.all([
+            checkCurrentSubscriptionFn(org, qs("#current-subscriptions-list"), qs("#other-subscriptions-info"))
         ]);
 
-        if ((activeProducts?.length || 0) < 1) { // MAX_ACTIVE_SUBSCRIPTIONS
-            rightPanel.style.display = "block";
-            wireAssignButton(newBtn, planList, org, onAssignPlan);
+        let currentSubs = subs[0];
+        if ((currentSubs.length) < config.maxAllowedSubscriptions) {
+            plansContainerButtons.style.display = "block";
+            wireAssignButton(newBtn, planList, org, checkAvailablePlansFn);
         }
     } catch(err) {
         console.error("Error rendering subscriptions:", err);
@@ -230,25 +405,29 @@ export async function renderOrganizationMenu(org, onCheckSubscription, onCheckOt
 }
 
 // Attach button logic
-export function wireAssignButton(btn, planList, org, onAssignPlan) {
+export function wireAssignButton(btn, planList, org, checkAvailablePlansFn) {
     btn.addEventListener("click", async () => {
         const opening = planList.style.display === "none";
         if (opening) {
             btn.disabled = true;
             btn.textContent = "Loading...";
             try {
-                await onAssignPlan(org);
-                planList.style.display = "block";
-                btn.textContent = "✖ Close";
+                console.log(0);
+                console.log(org);
+                console.log(checkAvailablePlansFn);
+                await checkAvailablePlansFn(org);
+                planList.style.removeProperty("display");
+                btn.textContent = "Close";
             } catch(err) {
-                showModalAlert("Failed to Load Plans", "Please try again or contact your administator (" + err.message +").");
-                btn.textContent = "➕ Add new subscription";
+                console.log(err);
+                showModalAlert("Failed to Load Plans", "Please try again or contact your administator (" + err +").");
+                btn.textContent = "Add";
             } finally {
                 btn.disabled = false;
             }
         } else {
             planList.style.display = "none";
-            btn.textContent = "➕ Add new subscripion";
+            btn.textContent = "Add";
         }
     });
 }
