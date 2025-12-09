@@ -317,7 +317,7 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
             let key = char.key;
             let value = card.querySelector("#characteristics").querySelector("#"+key).value;
             if(char.type=="percentage") {
-                if(isNaN(value) || value<0 || value>100){ 
+                if(value==null || value=="" || isNaN(value) || value<0 || value>100){ 
                     showModalAlert("Invalid percentage: " + value + "%", "Please enter a percentage between 0 and 100");
                     return; 
                 }
