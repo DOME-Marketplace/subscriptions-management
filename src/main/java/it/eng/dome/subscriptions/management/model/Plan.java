@@ -1,5 +1,8 @@
 package it.eng.dome.subscriptions.management.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -9,6 +12,12 @@ public class Plan {
 	private String description;	
 	private String offeringId;	
 	private String offeringPriceId;
+
+    private List<ConfigurableCharacteristic> configurableCharacteristics;
+
+    public Plan() {
+        this.configurableCharacteristics = new ArrayList<>();
+    }
 
     public String getName() {
         return name;
@@ -34,5 +43,19 @@ public class Plan {
     public void setOfferingPriceId(String offeringPriceId) {
         this.offeringPriceId = offeringPriceId;
     }
+
+    public void addConfigurableCharacteristic(ConfigurableCharacteristic cc) {
+        this.configurableCharacteristics.add(cc);
+    }
+
+    public List<ConfigurableCharacteristic> getConfigurableCharacteristics() {
+        return configurableCharacteristics;
+    }
+
+    public void setConfigurableCharacteristics(List<ConfigurableCharacteristic> configurableCharacteristics) {
+        this.configurableCharacteristics = configurableCharacteristics;
+    }
+
+    
 
 }
