@@ -29,6 +29,9 @@ public class SubscriptionManagementService {
     @Value("${subscription.max_active_subscriptions:1}")
     private int maxActiveSubscriptions;
 
+    @Value("${tool_operator.idm_id}")
+    private String toolOperatorIdm_id;
+
     @Value("${bae.bae_endpoint}")
     private String baeEndpoint;
 
@@ -142,7 +145,7 @@ public class SubscriptionManagementService {
 
         BillingAccountRef baRef = this.getBillingAccountByOrganization(subscription.getOrganizationId());
 
-        ProductBuilder builder = new ProductBuilder(tmfDataRetriever);
+        ProductBuilder builder = new ProductBuilder(tmfDataRetriever, toolOperatorIdm_id);
         ProductCreate pc = builder.build(offering, buyer, baRef, subscription.getCharacteristics());
 
         return tmfDataRetriever.saveProduct(pc);

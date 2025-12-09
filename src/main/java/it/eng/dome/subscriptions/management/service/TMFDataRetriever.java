@@ -92,6 +92,24 @@ public class TMFDataRetriever {
         }
     }
 
+    public Organization getOrganizationByIdmId(String idmId)
+            throws ExternalServiceException, BadTmfDataException {
+
+        List<Organization> all = getOrganizations();
+
+        return all.stream()
+                .filter(org -> org.getExternalReference() != null &&
+                        org.getExternalReference().stream().anyMatch(ref ->
+                                "idm_id".equals(ref.getExternalReferenceType()) &&
+                                        idmId.equals(ref.getName())
+                        )
+                )
+                .findFirst()
+                .orElseThrow(() -> new BadTmfDataException(
+                        "Organization", idmId, "No organization found with given idm_id"
+                ));
+    }
+
     // ======== TMF BILLING ACCOUNTS ========
 
     public BillingAccount fetchBillingAccount(Map<String, String> filter, int batchSize) throws ExternalServiceException {
