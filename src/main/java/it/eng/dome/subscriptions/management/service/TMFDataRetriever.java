@@ -17,6 +17,8 @@ import it.eng.dome.subscriptions.management.exception.BadTmfDataException;
 import it.eng.dome.subscriptions.management.exception.ExternalServiceException;
 import it.eng.dome.subscriptions.management.model.ConfigurableCharacteristic;
 import it.eng.dome.subscriptions.management.model.Plan;
+import it.eng.dome.subscriptions.management.model.Role;
+import it.eng.dome.subscriptions.management.utils.RelatedPartyUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,12 +158,12 @@ public class TMFDataRetriever {
                             "relatedParty.id", buyerId
                     );
 
-                    // FIXME: post-filter to make sure that the RP with the buyerId in the filter ha the role Buyer
-
                     // Fetch dei prodotti associati al PO
                     this.fetchProducts(null, filter, batchSize, product -> {
                         try {
-                            consumer.accept(product);
+                            // post filter, to be sure that the buyerId matches a RP with role BUYER
+                            if(RelatedPartyUtils.productHasPartyWithRole(product, buyerId, Role.BUYER))
+                                consumer.accept(product);
                         } catch (Exception e) {
                             logger.warn("Failed to process product {}: {}", product.getId(), e.getMessage(), e);
                         }
