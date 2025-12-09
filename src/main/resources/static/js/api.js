@@ -25,6 +25,7 @@ export async function fetchOtherSubscriptions(orgId) {
 export async function fetchPlans() {
     let plans = await safeFetch(`${API_BASE}/plans/active`);
     // workaround: add configurable characteristics. These should come from the server
+    /*
     for(var plan of plans) {
         plan.configurableCharacteristics = [];
         const isFederated = plan.name.toLowerCase().includes("federated") || plan.name.toLowerCase().includes("fms");
@@ -34,6 +35,7 @@ export async function fetchPlans() {
         }
         plan.configurableCharacteristics.push({key: "activationDate", type:"date", label: "Activation date"});
     }
+    */
     return plans;
 }
 

@@ -15,6 +15,7 @@ import it.eng.dome.tmforum.tmf666.v4.ApiException;
 import it.eng.dome.tmforum.tmf666.v4.model.BillingAccount;
 import it.eng.dome.subscriptions.management.exception.BadTmfDataException;
 import it.eng.dome.subscriptions.management.exception.ExternalServiceException;
+import it.eng.dome.subscriptions.management.model.ConfigurableCharacteristic;
 import it.eng.dome.subscriptions.management.model.Plan;
 
 import org.slf4j.Logger;
@@ -304,6 +305,30 @@ public class TMFDataRetriever {
                     // TODO: consider also product offering prices
                     plan.setOfferingPriceId(null);
                     
+                    // set configurable characteristics (TODO: should be retrieved from the offering, specs, etc..)
+                    boolean isFederated = plan.getName().toLowerCase().contains("federated") || plan.getName().toLowerCase().contains("fms");
+                    if(isFederated) {
+                        ConfigurableCharacteristic revPerc = new ConfigurableCharacteristic();
+                        revPerc.setKey("revenuePercentage");
+                        revPerc.setHide(false);
+                        revPerc.setLabel("Revenue share %");
+                        revPerc.setType("percentage");
+                        plan.addConfigurableCharacteristic(revPerc);
+                        ConfigurableCharacteristic mktSub = new ConfigurableCharacteristic();
+                        mktSub.setKey("marketplaceSubscription");
+                        mktSub.setHide(true);
+                        mktSub.setLabel("This is for a Federated Marketplace");
+                        mktSub.setType("boolean");
+                        mktSub.setValue("true");
+                        plan.addConfigurableCharacteristic(mktSub);
+                    }
+                    ConfigurableCharacteristic actDate = new ConfigurableCharacteristic();
+                    actDate.setHide(false);
+                    actDate.setLabel("Activation Date");
+                    actDate.setKey("activationDate");
+                    actDate.setType("date");
+                    plan.addConfigurableCharacteristic(actDate);
+
                     consumer.accept(plan);
 
                 } catch (Exception e) {
