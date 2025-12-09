@@ -192,6 +192,8 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
         cancelBtn.style.display="none"; 
 
         editBtn.addEventListener("click", () => { 
+                if(!acquireEditLock(subscriptionCard))
+                    return;
                 select.disabled=false; 
                 select.style.removeProperty("display");
                 statusLabel.style.display="none";
@@ -202,6 +204,7 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
         );
 
         cancelBtn.addEventListener("click", () => {
+                releaseEditLock(subscriptionCard);
                 select.value=subscription.status; 
                 select.disabled=true; 
                 statusLabel.style.removeProperty("display");
@@ -225,15 +228,18 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
                     confirmBtn.style.display="none"; 
                     editBtn.style.display="";
                     showModalAlert("Success", "Subscription updated successfully!");
+                    releaseEditLock(subscriptionCard);
                     onSuccessfulUpdateFn(org);
                 } catch(err) {
                     showModalAlert("Error" ,"Subscription update failed: "+err.message);
+                    releaseEditLock(subscriptionCard);
                     select.value=subscription.status; 
                     select.disabled=true; 
                     cancelBtn.style.display="none"; 
                     confirmBtn.style.display="none"; 
                     editBtn.style.display="";
                 } finally { 
+                    releaseEditLock(subscriptionCard);
                     confirmBtn.disabled=true; 
                     cancelBtn.disabled=true; 
                 }

@@ -3,25 +3,46 @@
 ========================== */
 
 :root {
-
-    --theme-accent: #00ADD3;
-
-    --theme-primary: #2D58A7;
-    --theme-secondary: #14274A;
-    --theme-background: white;
-    --theme-surface: #f0f0f0;
-    --theme-error: red;
-
-    --theme-on-background: var(--theme-primary);
-    --theme-on-primary: var(--theme-background);
-    --theme-on-secondary:  var(--theme-background);
-    --theme-on-surface: var(--theme-primary);
-    --theme-on-error: white;
-
+    --accent-blue: #00ADD3;
+    --medium-blue: #2D58A7;
+    --dark-blue: #14274A;
+    --darkwhite: #f0f0f0;
+    --white: white;
     --red: red;
-    --text-primary: 
-    --text-secondary:
+    --black: black;
+    --shadow-black : rgb(0, 0, 0, 0.2);
 }
+
+:root[data-theme="light"] {
+    --theme-accent: var(--accent-blue);
+    --theme-primary: var(--medium-blue);
+    --theme-secondary: var(--dark-blue);
+    --theme-background: var(--white);
+    --theme-surface: var(--darkwhite);
+    --theme-error: var(--red);
+    --theme-on-primary: var(--white);
+    --theme-on-secondary:  var(--white);
+    --theme-on-background: var(--medium-blue);
+    --theme-on-surface: var(--medium-blue);
+    --theme-on-error: var(--white);
+    --theme-shadow: var(--shadow-black);
+}
+
+:root[data-theme="dark"] {
+    --theme-accent: var(--accent-blue);
+    --theme-primary: var(--medium-blue);
+    --theme-secondary: var(--dark-blue);
+    --theme-background: var(--white);
+    --theme-surface: var(--darkwhite);
+    --theme-error: var(--red);
+    --theme-on-primary: var(--white);
+    --theme-on-secondary:  var(--white);
+    --theme-on-background: var(--medium-blue);
+    --theme-on-surface: var(--medium-blue);
+    --theme-on-error: var(--white);
+    --theme-shadow: var(--shadow-black);
+}
+
 
 body {
     margin: 0;
@@ -34,6 +55,7 @@ body {
 .layout {
     display: flex;
     height: 100vh;
+    padding:10pt;
 }
 
 /* ==========================
@@ -52,7 +74,7 @@ body {
     padding: 0 20px;
     box-sizing: border-box;
 
-    box-shadow: 0 2px 8px var(--theme-on-background);
+    box-shadow: 0px 3px 5px var(--theme-shadow);
 }
 
 .top-navbar .nav-left {
@@ -121,9 +143,8 @@ body {
     max-width: 350px;
     background: var(--theme-background);
     color: var(--theme-on-surface);
-    padding: 10px;
-    margin: 5vh;
-    margin-bottom: 10vh;
+    padding: 10pt;
+    margin: 5pt;
 }
 
 .sidebar h2 {
@@ -133,10 +154,9 @@ body {
 }
 
 .org-list {
-    border-top: 1pt solid var(--theme-on-surface);
-    height:calc(100% - 70px); 
+    height:calc(100% - 110pt); 
     overflow-y:scroll;
-    padding: 10pt 0pt;
+    padding: 0pt 10pt 0pt 0pt;
 }
 
 .org-card {
@@ -146,7 +166,7 @@ body {
     margin: 10pt 3pt;
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
-    box-shadow: 0px 3px 5px rgba(0,0,0,0.2);
+    box-shadow: 0px 3px 5px var(--theme-shadow);
     border-radius: 3pt;
 }
 
@@ -178,13 +198,13 @@ body {
 .main {
     flex: 1;
     background-color: var(--theme-background);
-    margin-top: 5vh;
-    margin-right: 5vh;
+    padding: 10pt;
+    margin: 5pt;
 }
 
 .subscriptions-container {
     display:none;
-    height: calc(100% - 230px);
+    height: calc(100% - 185pt);
     overflow-y: scroll;
     padding:10pt;
 }
@@ -195,7 +215,7 @@ body {
     border-radius: 12px;
     padding: 16px 20px;
     margin-bottom: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px var(--theme-shadow);
     animation: fadeIn 0.3s ease;
     text-align: center;
 }
@@ -213,7 +233,7 @@ body {
     color: var(--theme-on-secondary);
     border-radius: 3pt;
     padding: 20px 25px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 10px var(--theme-shadow);
     animation: fadeIn 0.3s ease;
     display: none;
 }
@@ -292,7 +312,7 @@ body {
     cursor: pointer;
     animation: fadeIn 0.2s ease;
     transition: background 0.2s, transform 0.2s;
-    box-shadow: 0px 3px 5px rgba(0,0,0,0.2);
+    box-shadow: 0px 3px 5px var(--theme-shadow);
     border-radius: 3pt;
     display:flex;
     flex-flow: column;
@@ -409,7 +429,7 @@ button:hover {
     border-radius: 8px;
     width: 300px;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 20px var(--theme-shadow);
 }
 
 .confirm-modal-content {
@@ -418,7 +438,7 @@ button:hover {
     border-radius: 12px;
     width: 500px;
     max-width: 90%;
-    box-shadow: 0 6px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 30px var(--theme-shadow);
     text-align: left;
     font-family: 'Fira Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     position: relative;
@@ -449,16 +469,16 @@ button:hover {
 @keyframes pulse {
     0% {
         transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+        box-shadow: 0 0 0 0 var(--theme-shadow);
     }
 
     70% {
         transform: scale(1);
-        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+        box-shadow: 0 0 0 10px var(--theme-shadow);
     }
 
     100% {
         transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+        box-shadow: 0 0 0 0var(--theme-shadow);
     }
 }
