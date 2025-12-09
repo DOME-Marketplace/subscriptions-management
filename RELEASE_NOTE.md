@@ -2,6 +2,17 @@
  
 **Release Notes** of the *Subscriptions Management*
 
+### <code>0.1.0</code> :calendar: 09/12/2025
+**Feature**
+* Introduced Plan class
+* Added tool_operator.idm_id property to application.yml for configuration
+* Added ability to retrieve an Organization by its idm_id
+
+**Improvement**
+* Moved configurable characteristics to the backend
+
+**Bug Fix**
+* Fixed activation date and termination date handling
 
 ### <code>0.0.2</code> :calendar: 09/12/2025
 **Feature**
@@ -10,10 +21,9 @@
 * Usage of `AbstractHealthService` class from `Brokerage Utils` to manage **getInfo()** and **getHealth()** features.
 * Usage of the `getChecksOnSelf` from `AbstractHealthService` of last version of `brokerage-utils`.
 * Usage of the `AbstractMarkdownGenerator` class to generate `REST_APIs.md`.
+
 **Improvements**
 * Update **javascripts** and **css layout** in the front-end.
-
-
 
 ### <code>0.0.1</code> :calendar: 05/12/2025
 **Feature**
