@@ -257,6 +257,7 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
             let editor = cn("#date-editor-template");
             editor.style.display=char.hide ? "none": "block";
             editor.querySelector("#label").innerHTML = char.label;
+            editor.querySelector("#value").valueAsDate = new Date();
             editor.querySelector("#value").id = char.key;
             card.querySelector("#characteristics").appendChild(editor);
         }

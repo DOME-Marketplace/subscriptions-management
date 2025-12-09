@@ -1,26 +1,29 @@
 import { safeFetch } from "./auth.js";
 
-// FIXME: we shouldnt wire host:port here... let'use relative paths
-//const API_BASE = "http://localhost:8680";
-const API_BASE = "";
+const API_BASE = "management";
 
 export async function fetchOrganizations() {
-    return await safeFetch(`${API_BASE}/management/organizations`);
+    return await safeFetch(`${API_BASE}/organizations`);
 }
 
+export async function fetchSubscriptions(orgId) {
+    return await safeFetch(`${API_BASE}/organizations/${orgId}/subscriptions`);
+}
+
+/*
 export async function fetchCurrentSubscriptions(orgId) {
-    // FIXME: it should simply be a GET to/management/<orgId>/subscriptions/current
-    return await safeFetch(`${API_BASE}/management/organizations/${orgId}/purchasedProducts`);
+    alert("deprecated 1");
+    return await safeFetch(`${API_BASE}/organizations/${orgId}/subscriptions/current`);
 }
 
 export async function fetchOtherSubscriptions(orgId) {
-    // FIXME: it should simply be a GET to/management/<orgId>/subscriptions/older
-    return await safeFetch(`${API_BASE}/management/organizations/${orgId}/otherProducts`);
+    alert("deprecated 2");
+    return await safeFetch(`${API_BASE}/organizations/${orgId}/subscriptions/older`);
 }
+*/
 
 export async function fetchPlans() {
-    // FIXME: it should simply be a GET to/management/plans/active
-    let plans = await safeFetch(`${API_BASE}/management/productOffering/validPlans`);
+    let plans = await safeFetch(`${API_BASE}/plans/active`);
     // workaround: add configurable characteristics. These should come from the server
     for(var plan of plans) {
         plan.configurableCharacteristics = [];
@@ -35,18 +38,26 @@ export async function fetchPlans() {
 }
 
 // subscribe the given org to the given plan (with the given params)
-export async function subscribeToPlan(org, plan, sharePercentage) {
-    // FIXME: it should simply be a POST to /management/subscriptions/
-    const params = new URLSearchParams({ orgId: org.id, offeringId: plan.id });
-    if (sharePercentage != null)
-        params.append("share", sharePercentage);
-    return await safeFetch(`${API_BASE}/management/product/save?${params.toString()}`, { method: "POST" });
+export async function subscribeToPlan(org, plan, characteristics) {
+    let subscription = { 
+        organizationId: org.id,
+        productOfferingId: plan.id,
+        productOfferingPrice: null,
+        characteristics: characteristics
+    };
+    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscription`, 
+            { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(subscription)
+            }
+    );
 }
 
 // update the the given subscription
 export async function updateSubscription(org, updatedSubscription) {
-    // FIXME: should be a PATCH or a PUT
-    // FIXME: the path should be /management/subscriptions/<subId>.. why we need the org as param?
+    // FIXME: should be a PATCH
+    // FIXME: the path should be /organizations/${orgId}/subscription/<subId>
     return await safeFetch(`${API_BASE}/management/subscription/update?orgId=${org.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -55,12 +66,11 @@ export async function updateSubscription(org, updatedSubscription) {
 }
 
 export async function fetchAllowedStatuses() {
-    // FIXME: the path should be /management/subscriptions/statuses (pllura subscriptions)
     return await safeFetch(`${API_BASE}/management/subscription/statuses`);
 }
 
 export async function fetchConfiguration() {
-    //  TODO: implement the following in REST
+    //  TODO: implement the following in REST. Maybe only for the last parameter. Let's keep the statuses here.
     //    return await safeFetch(`${API_BASE}/management/configuration`);
     return {
         statuses: {

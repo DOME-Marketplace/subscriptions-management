@@ -38,6 +38,13 @@ public class SubscriptionManagementService {
         return mutableOrgs;
     }
 
+
+    public List<Product> getSubscriptionsByBuyerId(String buyerId) throws ExternalServiceException {
+        List<Product> all = new ArrayList<>();
+        tmfDataRetriever.fetchAllSubscription(10, buyerId, all::add);
+        return all;
+    }
+
     public List<Product> getPurchasedProducts (String buyerId) throws ExternalServiceException {
         try {
             List<Product> purchasedProducts = new ArrayList<>();

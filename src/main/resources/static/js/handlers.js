@@ -21,10 +21,7 @@ export async function checkAllSubscriptions(org, currentContainer, othersContain
     const config = await api.fetchConfiguration();
     try {
         // retrieve all subscriptions...
-        let subs = await api.fetchCurrentSubscriptions(org.id);
-        subs = subs.concat(await api.fetchOtherSubscriptions(org.id));
-
-        console.log(subs);
+        let subs = await api.fetchSubscriptions(org.id);
 
         // ... then, cluster according to their status
         let currentSubs = [];
@@ -35,6 +32,8 @@ export async function checkAllSubscriptions(org, currentContainer, othersContain
             else
                 currentSubs.push(sub);
         }
+
+        // renden them in their own panels
         render.renderSubscriptions(org, currentSubs, currentContainer, selectOrganization, api.updateSubscription);
         render.renderSubscriptions(org, otherSubs, othersContainer, selectOrganization, api.updateSubscription);
         return [currentSubs, otherSubs];
@@ -56,11 +55,11 @@ export function activatePlanFn(org, plan, characteristics) {
     render.renderConfirmActivation(org, plan, characteristics, confirmActivation);
 }
 
-export async function confirmActivation(org, plan, share) {
+export async function confirmActivation(org, plan, characteristics) {
     const btn = render.qs("#confirm-modal-ok");
     btn.disabled = true; btn.textContent = "Loading...";
     try {
-        await api.subscribeToPlan(org, plan, share);
+        await api.subscribeToPlan(org, plan, characteristics);
         render.showOrganizationSubscriptions(getCurrentSelectedOrg(), checkAllSubscriptions, checkAvailablePlans);
         render.showModalAlert("Success","Plan assigned successfully!");
     } catch(err) {
