@@ -127,6 +127,7 @@ body {
 }
 
 .sidebar h2 {
+    color: var(--theme-secondary);
     margin-top: 0pt;
     font-size: 20px;
 }
@@ -150,6 +151,7 @@ body {
 }
 
 .org-card h3 {
+    color: var(--theme-secondary);
     margin: 0;
     font-size: 16px;
 }
@@ -162,6 +164,12 @@ body {
 .org-card:hover {
     background: var(--theme-secondary);
     color: var(--theme-on-secondary);
+}
+
+.org-card:hover h3 {
+    color: var(--theme-on-secondary);
+    margin: 0;
+    font-size: 16px;
 }
 
 /* ==========================
