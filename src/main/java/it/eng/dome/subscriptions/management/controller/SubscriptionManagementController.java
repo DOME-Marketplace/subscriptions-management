@@ -6,6 +6,7 @@ import it.eng.dome.tmforum.tmf637.v4.model.Product;
 import it.eng.dome.subscriptions.management.exception.BadSubscriptionException;
 import it.eng.dome.subscriptions.management.exception.BadTmfDataException;
 import it.eng.dome.subscriptions.management.exception.ExternalServiceException;
+import it.eng.dome.subscriptions.management.model.Plan;
 import it.eng.dome.subscriptions.management.model.Subscription;
 import it.eng.dome.subscriptions.management.service.SubscriptionManagementService;
 import it.eng.dome.subscriptions.management.service.TMFDataRetriever;
@@ -72,6 +73,7 @@ public class SubscriptionManagementController {
         }
     }
 
+    /*
     @GetMapping("/organizations/{organizationId}/subscription/current")
     public ResponseEntity<?> listPurchasedProducts(@PathVariable String organizationId) {
         try {
@@ -100,11 +102,12 @@ public class SubscriptionManagementController {
                     .body("Unexpected error: " + e.getMessage());
         }
     }
+    */
 
     @GetMapping("/plans/active")
-    public ResponseEntity<List<ProductOffering>> listProductOfferingPlans() {
+    public ResponseEntity<List<Plan>> listProductOfferingPlans() {
         try {
-            List<ProductOffering> planPOs = this.managementService.getProductOfferingPlans();
+            List<Plan> planPOs = this.managementService.getAvailablePlans();
             return ResponseEntity.ok(planPOs);
         } catch (Exception e) {
             return ResponseEntity

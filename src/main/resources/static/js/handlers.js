@@ -60,7 +60,8 @@ export function activatePlanFn(org, plan, characteristics) {
 
 export async function confirmActivation(org, plan, characteristics) {
     const btn = render.qs("#confirm-modal-ok");
-    btn.disabled = true; btn.textContent = "Loading...";
+    btn.disabled = true;
+    btn.textContent = "Activating...";
     try {
         await api.subscribeToPlan(org, plan, characteristics);
         render.showOrganizationSubscriptions(getCurrentSelectedOrg(), checkAllSubscriptions, checkAvailablePlans);
@@ -68,7 +69,9 @@ export async function confirmActivation(org, plan, characteristics) {
     } catch(err) {
         render.showModalAlert("Error","Cannot add new subscription: "+err.message);
     } finally {
-        btn.disabled=false; btn.textContent="Confirm";
+        btn.disabled=false;
+        btn.textContent="Confirm";
+        modal = render.qs("#confirm-modal").style.display="none";
     }
 }
 

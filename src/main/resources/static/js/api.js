@@ -41,8 +41,8 @@ export async function fetchPlans() {
 export async function subscribeToPlan(org, plan, characteristics) {
     let subscription = { 
         organizationId: org.id,
-        productOfferingId: plan.id,
-        productOfferingPrice: null,
+        productOfferingId: plan.offeringId,
+        productOfferingPrice: plan.offeringPriceId,
         characteristics: characteristics
     };
     return await safeFetch(`${API_BASE}/organizations/${org.id}/subscription`, 

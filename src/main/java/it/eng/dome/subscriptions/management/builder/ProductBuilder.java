@@ -10,7 +10,11 @@ import it.eng.dome.subscriptions.management.exception.ExternalServiceException;
 import it.eng.dome.subscriptions.management.service.TMFDataRetriever;
 import it.eng.dome.subscriptions.management.utils.TMFUtils;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +36,24 @@ public class ProductBuilder {
         ProductCreate product = new ProductCreate();
 
         product.setName(buyer.getTradingName() + " subscription to DOME");
-        product.setStartDate(OffsetDateTime.now());
         product.setBillingAccount(baRef);
-        product.setStatus(ProductStatusType.ACTIVE);
+        product.setStatus(ProductStatusType.CREATED);
+
+        // start time -> pick from characteristics (and remove from them)
+        if(characteristics!=null) {
+            String stringDate = characteristics.get("activationDate");
+            if(stringDate!=null) {
+                stringDate+="0000";
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-ddHHmm");
+                LocalDateTime datetime = LocalDateTime.parse(stringDate, formatter);
+                ZonedDateTime zoned = datetime.atZone(ZoneId.of("UTC"));
+                OffsetDateTime startDate = zoned.toOffsetDateTime();
+                product.setStartDate(startDate);
+                characteristics.remove("activationDate");
+            }
+        }
+        if(product.getStartDate()==null)
+            product.setStartDate(OffsetDateTime.now());
 
         // --- Characteristics ---
         product.setProductCharacteristic(buildCharacteristics(characteristics));
@@ -97,6 +116,7 @@ public class ProductBuilder {
         RelatedParty buyerRP = new RelatedParty();
         buyerRP.setId(buyer.getId());
         buyerRP.setHref(buyer.getHref());
+        // FIXME:name should be the value of the external reference id
         buyerRP.setName(buyer.getTradingName());
         buyerRP.setRole("Buyer");
         buyerRP.setAtReferredType("organization");
