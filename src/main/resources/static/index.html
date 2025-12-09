@@ -72,7 +72,7 @@
                         <!-- subscriptions loaded via JS -->
                     </div>
 
-                    <div class="plans-container">
+                    <div id="plans-container" class="plans-container">
                         <!-- buttons -->
                         <div id="plans-container-buttons" class="plans-container-buttons">
                             <button id="btn-assign-plan"></button>
@@ -134,13 +134,16 @@
         <!-- the organisation header in the main panel -->
         <div id="org-header-template">
             <p class="org-header-title"><strong id="tradingName"></strong></p>
-            <small><strong>ID:</strong><span id="id"></span></small>
+            <small><span id="id"></span></small>
+            <div style="text-align:right;">
+                <span id="link_to_dome" style="cursor:pointer">View this organization in DOME <img src="https://upload.wikimedia.org/wikipedia/commons/2/25/External.svg" style="height:10pt"> </span>
+            </div>
         </div>
 
         <!-- a card for a subscription -->
         <div id="subscription-template" class="sub-card">
             <h3 id="name"></h3>
-            <p><strong>ID: </strong><span id="id"></span></p>
+            <p><strong>Subscription ID: </strong><span id="id"></span></p>
             <p><strong>Activation Date: </strong><span id="activationDate"></span></p>
             <p id="terminationDateContainer"><strong>Termination Date: </strong><span id="terminationDate"></span></p>
             <div>

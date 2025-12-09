@@ -87,20 +87,27 @@ export function renderOrganizationsList(orgs, onOrganizationSelectedFn) {
 
 // OK
 export function updateSelectedOrgHeader(org) {
-    const a = qs("#org-header");   // FIXMe rename to org-header-container
+    const header = qs("#org-header");   // FIXMe rename to org-header-container
     const msg = qs("#message-panel");
     if(org) {
         msg.style.display="none";
-        a.style.display="block";
-        clear(a);
+        header.style.display="block";
+        clear(header);
         const orgHeader = cn("#org-header-template");
         orgHeader.querySelector("#tradingName").innerHTML = org.tradingName;
         orgHeader.querySelector("#id").innerHTML = org.id;
-        a.appendChild(orgHeader);
+        header.appendChild(orgHeader);
+
+        // link to the BAE
+        header.querySelector("#link_to_dome").addEventListener("click", () => {
+            let url = config.baeEndpoint + "/org-details/" + org.id;
+            window.open(url, org.id);
+        });
+
     }
     else {
+        header.style.display="none";
         msg.style.display="block";
-        a.style.display="none";
         msg.innerHTML = "<p>Select an Organization to view its Subscriptions</p>";
     }
 }
@@ -310,7 +317,7 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
             let key = char.key;
             let value = card.querySelector("#characteristics").querySelector("#"+key).value;
             if(char.type=="percentage") {
-                if(isNaN(value) || value<0 || value>100){ 
+                if(value==null || value=="" || isNaN(value) || value<0 || value>100){ 
                     showModalAlert("Invalid percentage: " + value + "%", "Please enter a percentage between 0 and 100");
                     return; 
                 }
@@ -369,8 +376,8 @@ export async function showOrganizationSubscriptions(org, checkCurrentSubscriptio
     clear(qs("#current-subscriptions-list"));
     clear(qs("#other-subscriptions-info"));
 
-    qs("#current-subscriptions-list").innerHTML = "loading...";
-    qs("#other-subscriptions-info").innerHTML = "loading...";
+    qs("#current-subscriptions-list").innerHTML = '<p class="nested-message">Loading...</p>';
+    qs("#other-subscriptions-info").innerHTML = '<p class="nested-message">Loading...</p>';
 
     // update the header
     updateSelectedOrgHeader(org);
@@ -382,10 +389,12 @@ export async function showOrganizationSubscriptions(org, checkCurrentSubscriptio
     qs("#subscriptions-container").style.display="block";
 
     // RIGHT PANEL: Assign Plan
+    const plansContainer = qs("#plans-container");
     const plansContainerButtons = qs("#plans-container-buttons");
     const planList = qs("#plan-list");
     const btnAssign = qs("#btn-assign-plan");
 
+    plansContainer.style.display = "none";
     plansContainerButtons.style.display = "none";
     planList.innerHTML = "";
     planList.style.display = "none";
@@ -405,6 +414,7 @@ export async function showOrganizationSubscriptions(org, checkCurrentSubscriptio
 
         let currentSubs = subs[0];
         if ((currentSubs.length) < config.maxAllowedSubscriptions) {
+            plansContainer.style.display = "block";
             plansContainerButtons.style.display = "block";
             wireAssignButton(newBtn, planList, org, checkAvailablePlansFn);
         }

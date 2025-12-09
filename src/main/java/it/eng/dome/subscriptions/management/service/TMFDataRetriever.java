@@ -174,6 +174,8 @@ public class TMFDataRetriever {
                             "relatedParty.id", buyerId
                     );
 
+                    // FIXME: post-filter to make sure that the RP with the buyerId in the filter ha the role Buyer
+
                     // Fetch dei prodotti associati al PO
                     this.fetchProducts(null, filter, batchSize, product -> {
                         try {
