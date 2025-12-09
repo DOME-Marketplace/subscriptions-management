@@ -4,15 +4,20 @@
 
 ### <code>0.1.0</code> :calendar: 09/12/2025
 **Feature**
-* Introduced Plan class
-* Added tool_operator.idm_id property to application.yml for configuration
-* Added ability to retrieve an Organization by its idm_id
+* Introduced Plan and Subscription class.
+* Added `tool_operator.idm_id` property to `application.yaml` for configuration.
+* Added ability to retrieve an Organization by its idm_id.
 
 **Improvement**
-* Moved configurable characteristics to the backend
+* Moved configurable characteristics to the backend.
+* Updated account endpoint in local environment.
+* Added lock to prevent opening more than one editor simultaneously.
+* Added lock to prevent closing a panel when an editor is still open.
 
 **Bug Fix**
-* Fixed activation date and termination date handling
+* Fixed activation date and termination date handling.
+* Post filtering on retrieved subscriptions (buyer id).
+* Fixed various CSS.
 
 ### <code>0.0.2</code> :calendar: 09/12/2025
 **Feature**
