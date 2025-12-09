@@ -27,6 +27,9 @@ public class SubscriptionManagementService {
     @Value("${subscription.max_active_subscriptions:1}")
     private int maxActiveSubscriptions;
 
+    @Value("${bae.bae_endpoint}")
+    private String baeEndpoint;
+
     private final Logger logger = LoggerFactory.getLogger(SubscriptionManagementService.class);
 
     @Autowired
@@ -208,6 +211,16 @@ public class SubscriptionManagementService {
                     "Maximum number of active subscriptions reached: " + maxActiveSubscriptions
             );
         }
+    }
+
+    public Map<String, Object> getConfiguration() {
+        Map<String, Object> config = new HashMap<>();
+
+        config.put("maxAllowedSubscriptions", this.maxActiveSubscriptions);
+
+        config.put("baeEndpoint", baeEndpoint);
+
+        return config;
     }
 
 }

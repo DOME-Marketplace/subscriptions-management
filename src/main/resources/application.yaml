@@ -58,5 +58,8 @@ tmforumapi:
   tmf637_inventory_path: tmf-api/productInventory/v4
   tmf666_account_management_path: tmf-api/accountManagement/v4
 
+bae:
+  bae_endpoint: ${BAE_ENDPOINT:https://dome-marketplace-dev2.org}
+
 subscription:
   max_active_subscriptions: ${MAX_ACTIVE_SUBSCRIPTIONS:1}

@@ -2,9 +2,14 @@ import * as api from "./api.js";
 import * as render from "./render.js";
 
 let currentSelectedOrg = null;
+let config = null;
 
 export function setCurrentSelectedOrg(org) {
         currentSelectedOrg = org; 
+}
+
+export function setConfig(cfg) {
+    config = cfg;
 }
 
 export function getCurrentSelectedOrg() {
@@ -18,7 +23,7 @@ export async function init() {
 }
 
 export async function checkAllSubscriptions(org, currentContainer, othersContainer) {
-    const config = await api.fetchConfiguration();
+//    const config = await api.fetchConfiguration();
     try {
         // retrieve all subscriptions...
         let subs = await api.fetchSubscriptions(org.id);
@@ -75,8 +80,7 @@ export async function selectOrganization(org) {
         render.showOrganizationSubscriptions(
             org, 
             checkAllSubscriptions,
-            checkAvailablePlans,
-            await api.fetchConfiguration()
+            checkAvailablePlans
         );
     }
     catch(err){

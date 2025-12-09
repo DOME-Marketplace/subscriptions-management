@@ -38,10 +38,16 @@ public class SubscriptionManagementController {
     public SubscriptionManagementController() {
         // Constructor for dependency injection
     }
-//
-//    @GetMapping("/config")
-//    public ResponseEntity<Map<String, Object>> getConfig() {
-//    }
+
+   @GetMapping("/configuration")
+    public ResponseEntity<Map<String, Object>> getConfiguration() {
+        Map<String, Object> config = managementService.getConfiguration();
+        try {
+            return ResponseEntity.ok(config);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+   }
 
     @GetMapping("/organizations")
     public ResponseEntity<List<Organization>> listOrganizations() {
