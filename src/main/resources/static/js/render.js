@@ -474,6 +474,8 @@ export function wireAssignButton(btn, planList, org, checkAvailablePlansFn) {
                 btn.disabled = false;
             }
         } else {
+            if(!acquireEditLock())
+                return;
             planList.style.display = "none";
             btn.textContent = "Add";
         }
