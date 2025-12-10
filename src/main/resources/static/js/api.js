@@ -104,12 +104,15 @@ export async function fetchConfiguration() {
                 description: "The product is suspended - it could be an outcome from a customer request or provider decision",
                 allowedTransitions: ["active"]
             },
+            /*
+            FIXME: temporarily disabled, waiting for the brokerage-utils to fix the enum, removing space from "aborted "
             aborted: {
                 label: "Aborted",
                 value: "aborted",
                 description: "The subscription activation has been stopped by abnormal condition. There is probably an unexpected delivery issue",
                 allowedTransitions: []
             },
+            */
             cancelled: {
                 label: "Cancelled",
                 value: "cancelled",
