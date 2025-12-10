@@ -162,7 +162,7 @@ public class ProductBuilder {
         if (org.getExternalReference() != null) {
             for (ExternalReference ext : org.getExternalReference()) {
                 if ("idm_id".equalsIgnoreCase(ext.getExternalReferenceType())) {
-                    return ext.getName(); // <-- questo è "did:elsi:VATSB-12345678J"
+                    return ext.getName();
                 }
             }
         }

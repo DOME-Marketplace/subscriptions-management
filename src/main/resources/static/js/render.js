@@ -34,6 +34,10 @@ export function releaseEditLock(who) {
     }
 }
 
+export function forceReleaseEditLock() {
+    currentEditor = null;
+}
+
 // ==========================
 // UTILITY
 // ==========================
@@ -69,10 +73,14 @@ export function renderConfirmActivation(org, plan, characteristics, onConfirmFn)
     const body = qs("#confirm-modal-body");
 
     body.innerHTML = `
-        <p><strong>Organization:</strong> ${org.tradingName}</p>
-        <p><strong>Organization ID:</strong> ${org.id}</p>
-        <p><strong>Plan:</strong> ${plan.name}</p>
-        <p><strong>Plan ID:</strong> ${plan.offeringId}</p>
+        <p>
+            <strong>Organization:</strong> ${org.tradingName}<br/>
+            <small>${org.id}</small>
+        </p>
+        <p>
+            <strong>Plan:</strong> ${plan.name}<br/>
+            <small>${plan.offeringId}</small>
+        </p>
         <br/>`;
         
     for(var key in characteristics) {
@@ -144,6 +152,7 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
 
     // prepare the card
     const subscriptionCard = cn("#subscription-template");
+    subscriptionCard.classList.add(subscription.status);
     subscriptionCard.querySelector("#name").innerHTML = subscription.name;
     subscriptionCard.querySelector("#id").innerHTML = subscription.id;
     subscriptionCard.querySelector("#activationDate").innerHTML = new Date(subscription.startDate).toLocaleDateString();
@@ -192,6 +201,8 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
         cancelBtn.style.display="none"; 
 
         editBtn.addEventListener("click", () => { 
+                if(!acquireEditLock(subscriptionCard))
+                    return;
                 select.disabled=false; 
                 select.style.removeProperty("display");
                 statusLabel.style.display="none";
@@ -202,6 +213,7 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
         );
 
         cancelBtn.addEventListener("click", () => {
+                releaseEditLock(subscriptionCard);
                 select.value=subscription.status; 
                 select.disabled=true; 
                 statusLabel.style.removeProperty("display");
@@ -225,15 +237,18 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
                     confirmBtn.style.display="none"; 
                     editBtn.style.display="";
                     showModalAlert("Success", "Subscription updated successfully!");
+                    releaseEditLock(subscriptionCard);
                     onSuccessfulUpdateFn(org);
                 } catch(err) {
                     showModalAlert("Error" ,"Subscription update failed: "+err.message);
+                    releaseEditLock(subscriptionCard);
                     select.value=subscription.status; 
                     select.disabled=true; 
                     cancelBtn.style.display="none"; 
                     confirmBtn.style.display="none"; 
                     editBtn.style.display="";
                 } finally { 
+                    releaseEditLock(subscriptionCard);
                     confirmBtn.disabled=true; 
                     cancelBtn.disabled=true; 
                 }
@@ -446,7 +461,7 @@ export async function showOrganizationSubscriptions(org, checkCurrentSubscriptio
         ]);
 
         let currentSubs = subs[0];
-        if ((currentSubs.length) < config.maxAllowedSubscriptions) {
+        if (countActive(currentSubs) < config.maxAllowedSubscriptions) {
             plansContainer.style.display = "block";
             plansContainerButtons.style.display = "block";
             wireAssignButton(newBtn, planList, org, checkAvailablePlansFn);
@@ -456,10 +471,23 @@ export async function showOrganizationSubscriptions(org, checkCurrentSubscriptio
     }
 }
 
+function countActive(subscriptions) {
+    if(subscriptions==null)
+        return 0;
+    let count = 0;
+    for(var sub of subscriptions) {
+        if(sub.status && "active"==sub.status)
+            count++;
+    }
+    return count;
+}
+
 // Attach button logic
 export function wireAssignButton(btn, planList, org, checkAvailablePlansFn) {
     btn.addEventListener("click", async () => {
         const opening = planList.style.display === "none";
+        if(!acquireEditLock())
+            return;
         if (opening) {
             btn.disabled = true;
             btn.textContent = "Loading...";
@@ -474,8 +502,6 @@ export function wireAssignButton(btn, planList, org, checkAvailablePlansFn) {
                 btn.disabled = false;
             }
         } else {
-            if(!acquireEditLock())
-                return;
             planList.style.display = "none";
             btn.textContent = "Add";
         }

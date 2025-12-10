@@ -64,4 +64,5 @@ subscription:
   max_active_subscriptions: ${MAX_ACTIVE_SUBSCRIPTIONS:1}
 
 tool_operator:
-  idm_id: ${TOOL_OPERATOR_IDM_ID:did:elsi:VATSB-12345678J}
+  idm_id: ${TOOL_OPERATOR_IDM_ID:VATIT-01995120019}
+  # it's the same for dev2
