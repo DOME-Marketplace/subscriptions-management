@@ -2,6 +2,11 @@
  
 **Release Notes** of the *Subscriptions Management*
 
+### <code>0.1.1</code> :calendar: 10/12/2025
+**Improvements**
+* temporarily removed status 'aborted'
+* Fixed various CSS issues.
+
 ### <code>0.1.0</code> :calendar: 09/12/2025
 **Feature**
 * Introduced Plan and Subscription class.

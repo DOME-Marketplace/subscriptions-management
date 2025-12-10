@@ -13,7 +13,7 @@
 	
 	<groupId>it.eng.dome.tool</groupId>
 	<artifactId>subscriptions-management</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1</version>
 	<name>subscription-management</name>
 	<description>Demo project for Spring Boot</description>
 
