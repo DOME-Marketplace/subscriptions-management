@@ -64,6 +64,7 @@ export async function confirmActivation(org, plan, characteristics) {
     btn.textContent = "Activating...";
     try {
         await api.subscribeToPlan(org, plan, characteristics);
+        render.forceReleaseEditLock();
         render.showOrganizationSubscriptions(getCurrentSelectedOrg(), checkAllSubscriptions, checkAvailablePlans);
         render.showModalAlert("Success","Plan assigned successfully!");
     } catch(err) {

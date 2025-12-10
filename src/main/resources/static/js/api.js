@@ -90,7 +90,7 @@ export async function fetchConfiguration() {
                 label: "Pending Active",
                 value: "pendingActive",
                 description: "The subscription is in activation phase. Not yes active but it is in progress",
-                allowedTransitions: ["active", "aborted", "canceled"]
+                allowedTransitions: ["active", "aborted", "cancelled"]
             },
             pendingTerminate: {
                 label: "Pending Terminate",
@@ -110,9 +110,9 @@ export async function fetchConfiguration() {
                 description: "The subscription activation has been stopped by abnormal condition. There is probably an unexpected delivery issue",
                 allowedTransitions: []
             },
-            canceled: {
-                label: "Canceled",
-                value: "canceled",
+            cancelled: {
+                label: "Cancelled",
+                value: "cancelled",
                 description: "The subscription activation has been cancelled - it could come from Customer or from the DOME Operator",
                 allowedTransitions: []
             },
@@ -123,7 +123,7 @@ export async function fetchConfiguration() {
                 allowedTransitions: []
             }
         },
-        finalStatuses : ["aborted", "canceled", "terminated"]
+        finalStatuses : ["aborted", "cancelled", "terminated"]
     }
     let remoteConfig = await safeFetch(`${API_BASE}/configuration`);
 
