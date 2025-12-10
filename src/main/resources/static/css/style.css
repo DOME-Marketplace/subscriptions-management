@@ -127,6 +127,7 @@ body {
 }
 
 .sidebar h2 {
+    color: var(--theme-secondary);
     margin-top: 0pt;
     font-size: 20px;
 }
@@ -146,9 +147,11 @@ body {
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
     box-shadow: 0px 3px 5px rgba(0,0,0,0.2);
+    border-radius: 3pt;
 }
 
 .org-card h3 {
+    color: var(--theme-secondary);
     margin: 0;
     font-size: 16px;
 }
@@ -163,6 +166,12 @@ body {
     color: var(--theme-on-secondary);
 }
 
+.org-card:hover h3 {
+    color: var(--theme-on-secondary);
+    margin: 0;
+    font-size: 16px;
+}
+
 /* ==========================
    MAIN PANEL
 ========================== */
@@ -175,8 +184,9 @@ body {
 
 .subscriptions-container {
     display:none;
-    height: calc(100% - 210px);
+    height: calc(100% - 230px);
     overflow-y: scroll;
+    padding:10pt;
 }
 
 
@@ -200,11 +210,10 @@ body {
 ========================== */
 .org-header {
     background: var(--theme-secondary);
-    color: #fff;
+    color: var(--theme-on-secondary);
     border-radius: 3pt;
     padding: 20px 25px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    margin-bottom: 20px;
     animation: fadeIn 0.3s ease;
     display: none;
 }
@@ -314,8 +323,8 @@ body {
 ========================== */
 .section-title {
     font-size: 18pt;
-    color: var(--theme-primary);
-    border-bottom: 1px solid var(--theme-primary);
+    color: var(--theme-secondary);
+    border-bottom: 1px solid var(--theme-secondary);
 }
 
 .subscription-list {
@@ -435,4 +444,21 @@ button:hover {
 @keyframes fadeIn {
     from {opacity: 0; transform: translateY(10px);}
     to   {opacity: 1; transform: translateY(0);}
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
 }

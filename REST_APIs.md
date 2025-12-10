@@ -1,6 +1,6 @@
 # Subscriptions Management
 
-**Version:** 0.0.2  
+**Version:** 0.1.0  
 **Description:** Swagger REST APIs for the subscriptions-management software  
 
 
@@ -9,13 +9,13 @@
 ### Subscriptions Management Controller
 | Verb | Path | Task |
 |------|------|------|
-| POST | `/management/subscription/update` | updateProduct |
-| POST | `/management/product/save` | saveProduct |
+| POST | `/management/organizations/{organizationId}/subscription` | saveProduct |
+| PATCH | `/management/organizations/{organizationId}/subscription/{subscriptionId}` | updateProduct |
 | GET | `/management/subscription/statuses` | getSubscriptionStatuses |
-| GET | `/management/productOffering/validPlans` | listProductOfferingPlans |
+| GET | `/management/plans/active` | listProductOfferingPlans |
 | GET | `/management/organizations` | listOrganizations |
-| GET | `/management/organizations/{organizationId}/purchasedProducts` | listPurchasedProducts |
-| GET | `/management/organizations/{organizationId}/otherProducts` | getOtherProducts |
+| GET | `/management/organizations/{organizationId}/subscriptions` | listSubscriptions |
+| GET | `/management/configuration` | getConfiguration |
 
 ### Subscriptions Info Controller
 | Verb | Path | Task |

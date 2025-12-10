@@ -7,6 +7,33 @@ export function setConfig(cfg) {
     config = cfg;
 }
 
+let currentEditor = null;
+
+export function acquireEditLock(who) {
+    if(currentEditor!=null && currentEditor!=who) {
+        currentEditor.style.animation = "pulse 2s infinite";
+        function stop() {
+            currentEditor.style.animation = "";
+        }
+        showModalAlert("Warning", "An editing session is ongoing.<br/>Please finalize or cancel it.", stop)
+        return false;
+    }
+    else {
+        currentEditor = who;
+        return true;
+    }
+}
+
+export function releaseEditLock(who) {
+    if(currentEditor == who) {
+        currentEditor = null;
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 // ==========================
 // UTILITY
 // ==========================
@@ -24,7 +51,7 @@ export function showModalAlert(title, message, onOk) {
     const overlay = qs("#modal-overlay");
     overlay.style.display = "flex";
     qs("#modal-title").textContent = title;
-    qs("#modal-message").textContent = message;
+    qs("#modal-message").innerHTML = message;
     const confirmBtn = qs("#modal-confirm");
     const cancelBtn = qs("#modal-cancel");
     cancelBtn.style.display = "none";
@@ -45,7 +72,7 @@ export function renderConfirmActivation(org, plan, characteristics, onConfirmFn)
         <p><strong>Organization:</strong> ${org.tradingName}</p>
         <p><strong>Organization ID:</strong> ${org.id}</p>
         <p><strong>Plan:</strong> ${plan.name}</p>
-        <p><strong>Plan ID:</strong> ${plan.id}</p>
+        <p><strong>Plan ID:</strong> ${plan.offeringId}</p>
         <br/>`;
         
     for(var key in characteristics) {
@@ -54,14 +81,14 @@ export function renderConfirmActivation(org, plan, characteristics, onConfirmFn)
 
     modal.style.display = "flex";
 
-    const cancelBtn = qs("#confirm-modal-cancel");
+    const cancelBtn = modal.querySelector("#confirm-modal-cancel");
     cancelBtn.onclick = () => {
             modal.style.display = "none";
             okBtn.onclick = null;
             cancelBtn.onclick = null;
         };
 
-    const okBtn = qs("#confirm-modal-ok");
+    const okBtn = modal.querySelector("#confirm-modal-ok");
     okBtn.onclick = () => {
             close(); 
             onConfirmFn && onConfirmFn(org, plan, characteristics); 
@@ -87,20 +114,27 @@ export function renderOrganizationsList(orgs, onOrganizationSelectedFn) {
 
 // OK
 export function updateSelectedOrgHeader(org) {
-    const a = qs("#org-header");   // FIXMe rename to org-header-container
+    const header = qs("#org-header");   // FIXMe rename to org-header-container
     const msg = qs("#message-panel");
     if(org) {
         msg.style.display="none";
-        a.style.display="block";
-        clear(a);
+        header.style.display="block";
+        clear(header);
         const orgHeader = cn("#org-header-template");
         orgHeader.querySelector("#tradingName").innerHTML = org.tradingName;
         orgHeader.querySelector("#id").innerHTML = org.id;
-        a.appendChild(orgHeader);
+        header.appendChild(orgHeader);
+
+        // link to the BAE
+        header.querySelector("#link_to_dome").addEventListener("click", () => {
+            let url = config.baeEndpoint + "/org-details/" + org.id;
+            window.open(url, org.id);
+        });
+
     }
     else {
+        header.style.display="none";
         msg.style.display="block";
-        a.style.display="none";
         msg.innerHTML = "<p>Select an Organization to view its Subscriptions</p>";
     }
 }
@@ -112,7 +146,15 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
     const subscriptionCard = cn("#subscription-template");
     subscriptionCard.querySelector("#name").innerHTML = subscription.name;
     subscriptionCard.querySelector("#id").innerHTML = subscription.id;
-    subscriptionCard.querySelector("#startDate").innerHTML = new Date(subscription.startDate).toLocaleDateString();
+    subscriptionCard.querySelector("#activationDate").innerHTML = new Date(subscription.startDate).toLocaleDateString();
+    if(subscription.terminationDate) {
+        subscriptionCard.querySelector("#terminationDateContainer").style.display="";
+        subscriptionCard.querySelector("#terminationDate").innerHTML = new Date(subscription.terminationDate).toLocaleDateString();
+    }
+    else {
+        subscriptionCard.querySelector("#terminationDateContainer").style.display="none";
+
+    }
 
     let options = "";
     for(let key in config.statuses) {
@@ -231,7 +273,7 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
     const card = cn("#subscription-plan-template");
 
     // filling values
-    card.querySelector("#id").innerHTML = plan.id;
+    card.querySelector("#id").innerHTML = plan.offeringId;
     card.querySelector("#name").innerHTML = plan.name;
     card.querySelector("#description").innerHTML = plan.description ? plan.description : "[No description available]";
 
@@ -265,8 +307,8 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
 
     // link to the BAE
     card.querySelector("#link_to_dome").addEventListener("click", () => {
-        let url = config.baeEndpoint + "/search/" + plan.id;
-        window.open(url, plan.id);
+        let url = config.baeEndpoint + "/search/" + plan.offeringId;
+        window.open(url, plan.offeringId);
     });
 
     // enable the 'select' button
@@ -274,6 +316,8 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
 
     // react to click on 'select'
     card.querySelector("#select").addEventListener("click", () => {
+        if(!acquireEditLock(card))
+            return;
         // show configuration params
         card.querySelector("#characteristics").style.display="block";
         // reconfigure buttons visibility
@@ -284,6 +328,7 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
 
     // react to click on 'cancel'
     card.querySelector("#cancel").addEventListener("click", () => {
+        releaseEditLock(card);
         // hide configuration params
         card.querySelector("#characteristics").style.display="none";
         // reconfigure buttons visibility
@@ -302,7 +347,7 @@ export function buildSubscriptionPlanCard(org, plan, activatePlanFn) {
             let key = char.key;
             let value = card.querySelector("#characteristics").querySelector("#"+key).value;
             if(char.type=="percentage") {
-                if(isNaN(value) || value<0 || value>100){ 
+                if(value==null || value=="" || isNaN(value) || value<0 || value>100){ 
                     showModalAlert("Invalid percentage: " + value + "%", "Please enter a percentage between 0 and 100");
                     return; 
                 }
@@ -356,13 +401,16 @@ export function renderPlans(org, plans, onPlanSelectedFn, container) {
 // OK
 export async function showOrganizationSubscriptions(org, checkCurrentSubscriptionFn, checkAvailablePlansFn) {
 
+    if(!acquireEditLock())
+        return;
+
     // some cleanup
     clear(qs("#message-panel"));
     clear(qs("#current-subscriptions-list"));
     clear(qs("#other-subscriptions-info"));
 
-    qs("#current-subscriptions-list").innerHTML = "loading...";
-    qs("#other-subscriptions-info").innerHTML = "loading...";
+    qs("#current-subscriptions-list").innerHTML = '<p class="nested-message">Loading...</p>';
+    qs("#other-subscriptions-info").innerHTML = '<p class="nested-message">Loading...</p>';
 
     // update the header
     updateSelectedOrgHeader(org);
@@ -374,10 +422,12 @@ export async function showOrganizationSubscriptions(org, checkCurrentSubscriptio
     qs("#subscriptions-container").style.display="block";
 
     // RIGHT PANEL: Assign Plan
+    const plansContainer = qs("#plans-container");
     const plansContainerButtons = qs("#plans-container-buttons");
     const planList = qs("#plan-list");
     const btnAssign = qs("#btn-assign-plan");
 
+    plansContainer.style.display = "none";
     plansContainerButtons.style.display = "none";
     planList.innerHTML = "";
     planList.style.display = "none";
@@ -397,6 +447,7 @@ export async function showOrganizationSubscriptions(org, checkCurrentSubscriptio
 
         let currentSubs = subs[0];
         if ((currentSubs.length) < config.maxAllowedSubscriptions) {
+            plansContainer.style.display = "block";
             plansContainerButtons.style.display = "block";
             wireAssignButton(newBtn, planList, org, checkAvailablePlansFn);
         }
@@ -413,20 +464,18 @@ export function wireAssignButton(btn, planList, org, checkAvailablePlansFn) {
             btn.disabled = true;
             btn.textContent = "Loading...";
             try {
-                console.log(0);
-                console.log(org);
-                console.log(checkAvailablePlansFn);
                 await checkAvailablePlansFn(org);
                 planList.style.removeProperty("display");
                 btn.textContent = "Close";
             } catch(err) {
-                console.log(err);
                 showModalAlert("Failed to Load Plans", "Please try again or contact your administator (" + err +").");
                 btn.textContent = "Add";
             } finally {
                 btn.disabled = false;
             }
         } else {
+            if(!acquireEditLock())
+                return;
             planList.style.display = "none";
             btn.textContent = "Add";
         }

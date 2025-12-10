@@ -9,6 +9,7 @@ import it.eng.dome.subscriptions.management.builder.ProductBuilder;
 import it.eng.dome.subscriptions.management.exception.BadSubscriptionException;
 import it.eng.dome.subscriptions.management.exception.BadTmfDataException;
 import it.eng.dome.subscriptions.management.exception.ExternalServiceException;
+import it.eng.dome.subscriptions.management.model.Plan;
 import it.eng.dome.subscriptions.management.model.Role;
 import it.eng.dome.subscriptions.management.model.Subscription;
 import it.eng.dome.subscriptions.management.model.comparator.OrganizationComparator;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @Service
@@ -26,6 +28,12 @@ public class SubscriptionManagementService {
 
     @Value("${subscription.max_active_subscriptions:1}")
     private int maxActiveSubscriptions;
+
+    @Value("${tool_operator.idm_id}")
+    private String toolOperatorIdm_id;
+
+    @Value("${bae.bae_endpoint}")
+    private String baeEndpoint;
 
     private final Logger logger = LoggerFactory.getLogger(SubscriptionManagementService.class);
 
@@ -46,7 +54,8 @@ public class SubscriptionManagementService {
         return all;
     }
 
-    public List<Product> getPurchasedProducts (String buyerId) throws ExternalServiceException {
+    /*
+    private List<Product> getPurchasedProducts (String buyerId) throws ExternalServiceException {
         try {
             List<Product> purchasedProducts = new ArrayList<>();
             // Batch processing of all active products
@@ -83,7 +92,18 @@ public class SubscriptionManagementService {
         }
         return others;
     }
+     */
 
+    public List<Plan> getAvailablePlans () throws ExternalServiceException {
+        List<Plan> plans = new ArrayList<>();
+        tmfDataRetriever.fetchAvailablePlans(10,
+                plans::add
+        );
+        logger.info("Total plans fetched: {}", plans.size());
+        return plans;
+    }
+
+    /*
     public List<ProductOffering> getProductOfferingPlans () throws ExternalServiceException {
         List<ProductOffering> planPOs = new ArrayList<>();
         tmfDataRetriever.fetchValidPlans(10,
@@ -92,6 +112,7 @@ public class SubscriptionManagementService {
         logger.info("Total POs (plans) fetched: {}", planPOs.size());
         return planPOs;
     }
+    */
 
     /*
     @Deprecated
@@ -119,12 +140,12 @@ public class SubscriptionManagementService {
         ProductOffering offering = tmfDataRetriever.getProductOffering(subscription.getProductOfferingId(), null);
         // TODO: also manage product offering price
 
-        //check max active subscriptions
+        // check max active subscriptions
         this.checkMaxActiveSubscriptions(subscription.getOrganizationId());
 
         BillingAccountRef baRef = this.getBillingAccountByOrganization(subscription.getOrganizationId());
 
-        ProductBuilder builder = new ProductBuilder(tmfDataRetriever);
+        ProductBuilder builder = new ProductBuilder(tmfDataRetriever, toolOperatorIdm_id);
         ProductCreate pc = builder.build(offering, buyer, baRef, subscription.getCharacteristics());
 
         return tmfDataRetriever.saveProduct(pc);
@@ -169,7 +190,6 @@ public class SubscriptionManagementService {
             this.checkMaxActiveSubscriptions(buyerId);
         }
 
-//        String offeringId = incomingProduct.getProductOffering().getId();
         Product existingProduct = tmfDataRetriever.getProduct(incomingProduct.getId(), null);
         if (existingProduct == null) {
             //fixme: better exception
@@ -180,14 +200,16 @@ public class SubscriptionManagementService {
     }
 
     private ProductUpdate buildProductUpdateFromProduct(Product product) {
+
+        // update the status
         ProductUpdate update = new ProductUpdate()
                 .status(product.getStatus());
-//                .atSchemaLocation(URI.create("https://raw.githubusercontent.com/DOME-Marketplace/tmf-api/refs/heads/main/DOME/TrackedEntity.schema.json"));
-//                .startDate(product.getStartDate())
-//                .terminationDate(product.getTerminationDate())
-//                .name(product.getName())
-//                .billingAccount(product.getBillingAccount())
-//                .productOffering(product.getProductOffering());
+
+        // if the new status is 'Terminated', also update the terminationDate
+        if(ProductStatusType.TERMINATED.equals(product.getStatus())) {
+            update.setTerminationDate(OffsetDateTime.now());
+        }
+
         return update;
     }
 
@@ -208,6 +230,13 @@ public class SubscriptionManagementService {
                     "Maximum number of active subscriptions reached: " + maxActiveSubscriptions
             );
         }
+    }
+
+    public Map<String, Object> getConfiguration() {
+        Map<String, Object> config = new HashMap<>();
+        config.put("maxAllowedSubscriptions", this.maxActiveSubscriptions);
+        config.put("baeEndpoint", baeEndpoint);
+        return config;
     }
 
 }

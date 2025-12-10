@@ -2,9 +2,14 @@ import * as api from "./api.js";
 import * as render from "./render.js";
 
 let currentSelectedOrg = null;
+let config = null;
 
 export function setCurrentSelectedOrg(org) {
         currentSelectedOrg = org; 
+}
+
+export function setConfig(cfg) {
+    config = cfg;
 }
 
 export function getCurrentSelectedOrg() {
@@ -18,7 +23,7 @@ export async function init() {
 }
 
 export async function checkAllSubscriptions(org, currentContainer, othersContainer) {
-    const config = await api.fetchConfiguration();
+//    const config = await api.fetchConfiguration();
     try {
         // retrieve all subscriptions...
         let subs = await api.fetchSubscriptions(org.id);
@@ -45,9 +50,7 @@ export async function checkAllSubscriptions(org, currentContainer, othersContain
 }
 
 export async function checkAvailablePlans(org) {
-    console.log("fetching plans...")
     const plans = await api.fetchPlans();
-    console.log(plans);
     render.renderPlans(org, plans, activatePlanFn, render.qs("#plan-list"));
 }
 
@@ -57,7 +60,8 @@ export function activatePlanFn(org, plan, characteristics) {
 
 export async function confirmActivation(org, plan, characteristics) {
     const btn = render.qs("#confirm-modal-ok");
-    btn.disabled = true; btn.textContent = "Loading...";
+    btn.disabled = true;
+    btn.textContent = "Activating...";
     try {
         await api.subscribeToPlan(org, plan, characteristics);
         render.showOrganizationSubscriptions(getCurrentSelectedOrg(), checkAllSubscriptions, checkAvailablePlans);
@@ -65,7 +69,9 @@ export async function confirmActivation(org, plan, characteristics) {
     } catch(err) {
         render.showModalAlert("Error","Cannot add new subscription: "+err.message);
     } finally {
-        btn.disabled=false; btn.textContent="Confirm";
+        btn.disabled=false;
+        btn.textContent="Confirm";
+        modal = render.qs("#confirm-modal").style.display="none";
     }
 }
 
@@ -75,8 +81,7 @@ export async function selectOrganization(org) {
         render.showOrganizationSubscriptions(
             org, 
             checkAllSubscriptions,
-            checkAvailablePlans,
-            await api.fetchConfiguration()
+            checkAvailablePlans
         );
     }
     catch(err){

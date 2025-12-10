@@ -1,11 +1,11 @@
 package it.eng.dome.subscriptions.management.controller;
 
-import it.eng.dome.tmforum.tmf620.v4.model.ProductOffering;
 import it.eng.dome.tmforum.tmf632.v4.model.Organization;
 import it.eng.dome.tmforum.tmf637.v4.model.Product;
 import it.eng.dome.subscriptions.management.exception.BadSubscriptionException;
 import it.eng.dome.subscriptions.management.exception.BadTmfDataException;
 import it.eng.dome.subscriptions.management.exception.ExternalServiceException;
+import it.eng.dome.subscriptions.management.model.Plan;
 import it.eng.dome.subscriptions.management.model.Subscription;
 import it.eng.dome.subscriptions.management.service.SubscriptionManagementService;
 import it.eng.dome.subscriptions.management.service.TMFDataRetriever;
@@ -38,10 +38,16 @@ public class SubscriptionManagementController {
     public SubscriptionManagementController() {
         // Constructor for dependency injection
     }
-//
-//    @GetMapping("/config")
-//    public ResponseEntity<Map<String, Object>> getConfig() {
-//    }
+
+   @GetMapping("/configuration")
+    public ResponseEntity<Map<String, Object>> getConfiguration() {
+        Map<String, Object> config = managementService.getConfiguration();
+        try {
+            return ResponseEntity.ok(config);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+   }
 
     @GetMapping("/organizations")
     public ResponseEntity<List<Organization>> listOrganizations() {
@@ -66,6 +72,7 @@ public class SubscriptionManagementController {
         }
     }
 
+    /*
     @GetMapping("/organizations/{organizationId}/subscription/current")
     public ResponseEntity<?> listPurchasedProducts(@PathVariable String organizationId) {
         try {
@@ -94,11 +101,12 @@ public class SubscriptionManagementController {
                     .body("Unexpected error: " + e.getMessage());
         }
     }
+    */
 
     @GetMapping("/plans/active")
-    public ResponseEntity<List<ProductOffering>> listProductOfferingPlans() {
+    public ResponseEntity<List<Plan>> listProductOfferingPlans() {
         try {
-            List<ProductOffering> planPOs = this.managementService.getProductOfferingPlans();
+            List<Plan> planPOs = this.managementService.getAvailablePlans();
             return ResponseEntity.ok(planPOs);
         } catch (Exception e) {
             return ResponseEntity

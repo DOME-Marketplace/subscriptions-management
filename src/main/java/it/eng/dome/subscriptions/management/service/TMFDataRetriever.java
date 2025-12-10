@@ -15,6 +15,11 @@ import it.eng.dome.tmforum.tmf666.v4.ApiException;
 import it.eng.dome.tmforum.tmf666.v4.model.BillingAccount;
 import it.eng.dome.subscriptions.management.exception.BadTmfDataException;
 import it.eng.dome.subscriptions.management.exception.ExternalServiceException;
+import it.eng.dome.subscriptions.management.model.ConfigurableCharacteristic;
+import it.eng.dome.subscriptions.management.model.Plan;
+import it.eng.dome.subscriptions.management.model.Role;
+import it.eng.dome.subscriptions.management.utils.RelatedPartyUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -89,6 +94,24 @@ public class TMFDataRetriever {
         }
     }
 
+    public Organization getOrganizationByIdmId(String idmId)
+            throws ExternalServiceException, BadTmfDataException {
+
+        List<Organization> all = getOrganizations();
+
+        return all.stream()
+                .filter(org -> org.getExternalReference() != null &&
+                        org.getExternalReference().stream().anyMatch(ref ->
+                                "idm_id".equals(ref.getExternalReferenceType()) &&
+                                        idmId.equals(ref.getName())
+                        )
+                )
+                .findFirst()
+                .orElseThrow(() -> new BadTmfDataException(
+                        "Organization", idmId, "No organization found with given idm_id"
+                ));
+    }
+
     // ======== TMF BILLING ACCOUNTS ========
 
     public BillingAccount fetchBillingAccount(Map<String, String> filter, int batchSize) throws ExternalServiceException {
@@ -156,7 +179,9 @@ public class TMFDataRetriever {
                     // Fetch dei prodotti associati al PO
                     this.fetchProducts(null, filter, batchSize, product -> {
                         try {
-                            consumer.accept(product);
+                            // post filter, to be sure that the buyerId matches a RP with role BUYER
+                            if(RelatedPartyUtils.productHasPartyWithRole(product, buyerId, Role.BUYER))
+                                consumer.accept(product);
                         } catch (Exception e) {
                             logger.warn("Failed to process product {}: {}", product.getId(), e.getMessage(), e);
                         }
@@ -265,6 +290,68 @@ public class TMFDataRetriever {
                     }
 
                     consumer.accept(po);
+
+                } catch (Exception e) {
+                    logger.warn("Failed to process ProductOffering {}: {}", po.getId(), e.getMessage(), e);
+                }
+            });
+
+        } catch (Exception e) {
+            logger.error("Failed to fetch valid plans", e);
+            throw new ExternalServiceException("Failed to fetch valid plans", e);
+        }
+    }
+
+    public void fetchAvailablePlans(int batchSize, Consumer<Plan> consumer) throws ExternalServiceException {
+        try {
+            this.fetchProductOfferings(null, Map.of("category.name", "DOME OPERATOR Plan"), batchSize, po -> {
+                try {
+
+                    if (!"Launched".equalsIgnoreCase(po.getLifecycleStatus())) {
+                        return;
+                    }
+
+                    Plan plan = new Plan();
+
+                    OffsetDateTime now = OffsetDateTime.now();
+                    if (po.getValidFor() != null) {
+                        OffsetDateTime start = po.getValidFor().getStartDateTime();
+                        OffsetDateTime end = po.getValidFor().getEndDateTime();
+                        if (start != null && start.isAfter(now)) return;
+                        if (end != null && end.isBefore(now)) return;
+                    }
+
+                    plan.setDescription(po.getDescription());
+                    plan.setName(po.getName());
+                    plan.setOfferingId(po.getId());
+                    // TODO: consider also product offering prices
+                    plan.setOfferingPriceId(null);
+                    
+                    // set configurable characteristics (TODO: should be retrieved from the offering, specs, etc..)
+                    boolean isFederated = plan.getName().toLowerCase().contains("federated") || plan.getName().toLowerCase().contains("fms");
+                    if(isFederated) {
+                        ConfigurableCharacteristic revPerc = new ConfigurableCharacteristic();
+                        revPerc.setKey("revenuePercentage");
+                        revPerc.setHide(false);
+                        revPerc.setLabel("Revenue share %");
+                        revPerc.setType("percentage");
+                        plan.addConfigurableCharacteristic(revPerc);
+                        ConfigurableCharacteristic mktSub = new ConfigurableCharacteristic();
+                        mktSub.setKey("marketplaceSubscription");
+                        mktSub.setHide(true);
+                        mktSub.setLabel("This is for a Federated Marketplace");
+                        mktSub.setType("boolean");
+                        mktSub.setValue("true");
+                        plan.addConfigurableCharacteristic(mktSub);
+                    }
+                    ConfigurableCharacteristic actDate = new ConfigurableCharacteristic();
+                    actDate.setHide(false);
+                    actDate.setLabel("Activation Date");
+                    actDate.setKey("activationDate");
+                    actDate.setType("date");
+                    plan.addConfigurableCharacteristic(actDate);
+
+                    consumer.accept(plan);
 
                 } catch (Exception e) {
                     logger.warn("Failed to process ProductOffering {}: {}", po.getId(), e.getMessage(), e);
