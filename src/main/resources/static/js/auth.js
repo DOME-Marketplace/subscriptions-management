@@ -84,7 +84,7 @@ export async function exchangeCodeForToken(code) {
     sessionStorage.setItem("refresh_token", data.refresh_token);
     console.log("Token obtained:", data.access_token);
 
-    // Rimuove ?code dalla URL
+    // remove ?code from URL
     window.history.replaceState({}, document.title, window.location.pathname);
     sessionStorage.removeItem('pkce_verifier');
 }
@@ -106,6 +106,7 @@ export function getUserRoles() {
     return [...realmRoles, ...clientRoles];
 }
 
+// TODO: not used yet
 export async function refreshToken() {
     const refreshToken = sessionStorage.getItem("refresh_token");
     if(!refreshToken) return redirectToLocalLogin();
@@ -189,9 +190,9 @@ export async function logout() {
         }
     }
 
-    // Pulizia locale
+    // clear local session
     sessionStorage.clear();
 
-    // Redirect al login locale
+    // redirect to local login page
     window.location.href = window.location.origin + "/login.html";
 }

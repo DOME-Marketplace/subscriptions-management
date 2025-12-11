@@ -26,7 +26,8 @@ public class SecurityConfig {
         http
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .csrf(csrf -> csrf.disable()) // necessario per API REST
+                //necessary to disable csrf for non-browser clients
+                .csrf(csrf -> csrf.disable())
 
                 // same-origin cors not needed
                 .cors(cors -> cors.disable())
