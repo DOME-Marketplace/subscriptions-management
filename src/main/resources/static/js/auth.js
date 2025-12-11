@@ -90,6 +90,47 @@ export async function exchangeCodeForToken(code) {
 }
 
 // ==========================
+// TOKEN UTILITYS
+// ==========================
+export function getTokenPayload() {
+    const token = sessionStorage.getItem("token");
+    if(!token) return null;
+    return JSON.parse(atob(token.split('.')[1]));
+}
+
+export function getUserRoles() {
+    const payload = getTokenPayload();
+//    return payload?.realm_access?.roles || [];
+    const realmRoles = payload.realm_access?.roles || [];
+    const clientRoles = payload.resource_access?.["spring-be"]?.roles || [];
+    return [...realmRoles, ...clientRoles];
+}
+
+export async function refreshToken() {
+    const refreshToken = sessionStorage.getItem("refresh_token");
+    if(!refreshToken) return redirectToLocalLogin();
+
+    const body = new URLSearchParams({
+        grant_type: "refresh_token",
+        client_id: CLIENT_ID,
+        refresh_token: refreshToken
+    });
+
+    const res = await fetch(`${KEYCLOAK_BASE}/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString()
+    });
+
+    if(!res.ok) return redirectToLocalLogin();
+
+    const data = await res.json();
+    sessionStorage.setItem("token", data.access_token);
+    sessionStorage.setItem("refresh_token", data.refresh_token);
+}
+
+
+// ==========================
 // SAFE FETCH
 // ==========================
 export async function safeFetch(url, options = {}) {
@@ -123,8 +164,34 @@ export async function safeFetch(url, options = {}) {
 // ==========================
 // LOGOUT
 // ==========================
-export function logout() {
+//export function logout() {
+//    sessionStorage.clear();
+//    const redirectUri = encodeURIComponent(window.location.origin + "/login.html");
+//    window.location.href = `${KEYCLOAK_BASE}/logout?redirect_uri=${redirectUri}`;
+//}
+
+export async function logout() {
+    const refreshToken = sessionStorage.getItem("refresh_token");
+    if (refreshToken) {
+        const body = new URLSearchParams({
+            client_id: CLIENT_ID,
+            refresh_token: refreshToken
+        });
+
+        try {
+            await fetch(`${KEYCLOAK_BASE}/logout`, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: body.toString()
+            });
+        } catch(err) {
+            console.warn("Keycloak logout failed, continuing locally", err);
+        }
+    }
+
+    // Pulizia locale
     sessionStorage.clear();
-    const redirectUri = encodeURIComponent(window.location.origin + "/login.html");
-    window.location.href = `${KEYCLOAK_BASE}/logout?redirect_uri=${redirectUri}`;
+
+    // Redirect al login locale
+    window.location.href = window.location.origin + "/login.html";
 }
