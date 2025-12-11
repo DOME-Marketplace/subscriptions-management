@@ -2,6 +2,11 @@
  
 **Release Notes** of the *Subscriptions Management*
 
+### <code>0.1.X</code> :calendar: XX/12/2025
+**Improvements**
+* more robust management in case of wrong product status values from tmf-api
+* order of statuses reshuffled in editor dropdown
+
 ### <code>0.1.1</code> :calendar: 10/12/2025
 **Improvements**
 * temporarily removed status 'aborted'

@@ -162,19 +162,31 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
     }
     else {
         subscriptionCard.querySelector("#terminationDateContainer").style.display="none";
-
     }
+
+    let subscriptionStatusFromConfig = config.statuses[subscription.status];
+
+    // this is to cope with wrong status values in TMF
+    if(!subscriptionStatusFromConfig) {
+        subscriptionStatusFromConfig = {
+            label: subscription.status,
+            value: subscription.status,
+            description: "WARNING: The retrieved status '" + subscription.status + "' is not a valid status",
+            allowedTransitions: []
+        }
+    }  
 
     let options = "";
     for(let key in config.statuses) {
         let status = config.statuses[key];
         let value = status.value;
         let selected = (value==subscription.status);
-        let disabled = !config.statuses[subscription.status].allowedTransitions.includes(value);
+        let disabled = !(subscriptionStatusFromConfig.allowedTransitions).includes(value);
         options += `<option value="${value}" ${selected?"selected":""} ${disabled?"disabled":""}>${status.label}</option>`;
     }
     subscriptionCard.querySelector("#statusOptions").innerHTML = options;
-    subscriptionCard.querySelector("#statusLabel").innerHTML = config.statuses[subscription.status].label + " - " + config.statuses[subscription.status].description;
+    subscriptionCard.querySelector("#statusLabel").innerHTML = subscriptionStatusFromConfig.label + " - " + subscriptionStatusFromConfig.description;
+
 
     subscriptionCard.classList.add(subscription.status);
 
@@ -203,9 +215,12 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
         editBtn.addEventListener("click", () => { 
                 if(!acquireEditLock(subscriptionCard))
                     return;
+                // show the dropdown
                 select.disabled=false; 
                 select.style.removeProperty("display");
+                // hide the label
                 statusLabel.style.display="none";
+                // update buttons
                 confirmBtn.style.display=""; 
                 cancelBtn.style.display=""; 
                 editBtn.style.display="none"; 
@@ -214,10 +229,13 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
 
         cancelBtn.addEventListener("click", () => {
                 releaseEditLock(subscriptionCard);
+                // hide the dropdown
                 select.value=subscription.status; 
                 select.disabled=true; 
-                statusLabel.style.removeProperty("display");
                 select.style.display="none";
+                // show the label
+                statusLabel.style.removeProperty("display");
+                // update buttons
                 confirmBtn.style.display="none"; 
                 cancelBtn.style.display="none"; 
                 editBtn.style.display=""; 
@@ -226,31 +244,37 @@ export function buildSubscriptionCard(org, subscription, onSuccessfulUpdateFn, u
 
         confirmBtn.addEventListener("click", async () => {
                 const newStatus = select.value;
-                confirmBtn.disabled = true;
-                cancelBtn.disabled = true;
                 try {
                     const updatedProduct = { ...subscription, status:newStatus };
                     await updateSubscriptionFn(org, updatedProduct);
                     subscription.status = newStatus;
+                    // hide the dropdown
+                    select.value=subscription.status; 
                     select.disabled=true;
+                    select.style.display="none";
+                    // show the label
+                    statusLabel.style.removeProperty("display");
+                    // update buttons
                     cancelBtn.style.display="none"; 
                     confirmBtn.style.display="none"; 
                     editBtn.style.display="";
+                    // feedback to user
                     showModalAlert("Success", "Subscription updated successfully!");
                     releaseEditLock(subscriptionCard);
                     onSuccessfulUpdateFn(org);
                 } catch(err) {
-                    showModalAlert("Error" ,"Subscription update failed: "+err.message);
-                    releaseEditLock(subscriptionCard);
-                    select.value=subscription.status; 
-                    select.disabled=true; 
-                    cancelBtn.style.display="none"; 
-                    confirmBtn.style.display="none"; 
-                    editBtn.style.display="";
+                    showModalAlert("Error" ,"Subscription update failed: " + err.message);
+                    // stay in edit mode
+                    // keep the dropdown visible
+                    select.disabled=false; 
+                    select.style.removeProperty("display");
+                    // keep the label hidden
+                    statusLabel.style.display="none";
+                    // update buttons
+                    confirmBtn.style.display=""; 
+                    cancelBtn.style.display=""; 
+                    editBtn.style.display="none"; 
                 } finally { 
-                    releaseEditLock(subscriptionCard);
-                    confirmBtn.disabled=true; 
-                    cancelBtn.disabled=true; 
                 }
             }
         );    
