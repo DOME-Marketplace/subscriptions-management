@@ -8,6 +8,9 @@
 * order of statuses reshuffled in editor dropdown
 * updated paths for REST API
 
+**Feature**
+* Enhance authentication and authorization: 
+  * add token utilities, update security configuration, and implement role-based access control
 
 ### <code>0.1.1</code> :calendar: 10/12/2025
 

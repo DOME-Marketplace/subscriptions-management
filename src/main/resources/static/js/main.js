@@ -14,7 +14,7 @@ import * as handlers from "./handlers.js";
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         // ==========================
-        // GESTIONE CODE DA KEYCLOAK
+        // KEYCLOAK 'CODE' MANAGEMENT TO ACCESS TOKEN
         // ==========================
          const params = new URLSearchParams(window.location.search);
          const code = params.get("code");
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         // ==========================
-        // SALUTO UTENTE + LOGOUT
+        // CHECK IF TOKER IS PRESENT
         // ==========================
         const payload = getTokenPayload();
         if (!payload) {
@@ -51,8 +51,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
+        // ==========================
+        // USER NAV INFO AND LOGOUT BTN
+        // ==========================
         const username = payload.preferred_username || payload.name || "Guest";
-//        const username = "devMode";
         const userNameElem = document.querySelector("#user-name");
         //if(userNameElem) userNameElem.textContent = username;
         if (userNameElem) {
@@ -60,9 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 userNameElem.textContent = `${username} (${roles.join(", ")})`;
         }
 
-//        const userNameElem = document.querySelector("#user-name");
-//        if(userNameElem) userNameElem.textContent = username;
-
+        //logout button
         const logoutBtn = document.querySelector("#logoutBtn");
         if(logoutBtn) logoutBtn.onclick = logout;
 
