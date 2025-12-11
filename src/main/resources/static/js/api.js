@@ -1,6 +1,6 @@
 import { safeFetch } from "./auth.js";
 
-const API_BASE = "management";
+const API_BASE = "";
 
 export async function fetchOrganizations() {
     return await safeFetch(`${API_BASE}/organizations`);
@@ -47,7 +47,7 @@ export async function subscribeToPlan(org, plan, characteristics) {
         productOfferingPrice: plan.offeringPriceId,
         characteristics: characteristics
     };
-    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscription`, 
+    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscriptions`, 
             { 
                 method: "POST", 
                 headers: { "Content-Type": "application/json" },
@@ -58,7 +58,7 @@ export async function subscribeToPlan(org, plan, characteristics) {
 
 // update the the given subscription
 export async function updateSubscription(org, updatedSubscription) {
-    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscription/${updatedSubscription.id}`, 
+    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscriptions/${updatedSubscription.id}`, 
             {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -67,9 +67,11 @@ export async function updateSubscription(org, updatedSubscription) {
     );
 }
 
+/*
 export async function fetchAllowedStatuses() {
     return await safeFetch(`${API_BASE}/management/subscription/statuses`);
 }
+*/
 
 export async function fetchConfiguration() {
     let localConfig = {

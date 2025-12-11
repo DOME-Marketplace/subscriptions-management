@@ -16,7 +16,7 @@ import it.eng.dome.brokerage.observability.info.Info;
 
 
 @RestController
-@RequestMapping("/subscriptions")
+@RequestMapping("/status")
 @Tag(name = "Subscriptions Info Controller", description = "APIs to get info of the subscriptions-management")
 public class SubscriptionsInfoController {
 
