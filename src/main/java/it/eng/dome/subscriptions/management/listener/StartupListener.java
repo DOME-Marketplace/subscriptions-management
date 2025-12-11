@@ -31,7 +31,7 @@ public class StartupListener implements ApplicationListener<ApplicationReadyEven
 	// RegEx to get the placeholder ${ENV_VAR} and extract the default value (if any)
     private static final Pattern PLACEHOLDER = Pattern.compile("\\$\\{([^:}]+)(?::([^}]*))?}");
 
-	private final String INFO_PATH = "/subscriptions/info";
+	private final String INFO_PATH = "/status/info";
 
 	@Autowired
 	private RestClient restClient;

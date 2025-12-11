@@ -3,22 +3,24 @@
 **Release Notes** of the *Subscriptions Management*
 
 ### <code>0.1.X</code> :calendar: XX/12/2025
-**Improvements**
+**Enhancements**
 * more robust management in case of wrong product status values from tmf-api
 * order of statuses reshuffled in editor dropdown
+* updated paths for REST API
+
 
 ### <code>0.1.1</code> :calendar: 10/12/2025
-**Improvements**
+
+**Bug fixes**
 * temporarily removed status 'aborted'
 * Fixed various CSS issues.
 
 ### <code>0.1.0</code> :calendar: 09/12/2025
-**Feature**
+
+**Enhancements**
 * Introduced Plan and Subscription class.
 * Added `tool_operator.idm_id` property to `application.yaml` for configuration.
 * Added ability to retrieve an Organization by its idm_id.
-
-**Improvement**
 * Moved configurable characteristics to the backend.
 * Updated account endpoint in local environment.
 * Added lock to prevent opening more than one editor simultaneously.
