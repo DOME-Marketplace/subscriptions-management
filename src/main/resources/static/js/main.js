@@ -5,7 +5,6 @@ import {
     redirectToLocalLogin,
     getTokenPayload,
     getUserRoles,
-    refreshToken
 } from "./auth.js";
 import * as api from "./api.js";
 import * as render from "./render.js";
@@ -22,15 +21,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // ==========================
         // TOKEN CONTROL
-        // ==========================
-        const token = sessionStorage.getItem("token");
-        if(!token){
-             redirectToLocalLogin();
-             return;
-        }
-
-        // ==========================
-        // CHECK IF TOKER IS PRESENT
         // ==========================
         const payload = getTokenPayload();
         if (!payload) {
