@@ -38,7 +38,7 @@ function generateRandomString(length = 43) {
 // ==========================
 export async function redirectToLogin() {
     const codeVerifier = generateRandomString();
-    sessionStorage.setItem('pkce_verifier', codeVerifier);
+    setCookie('pkce_verifier', codeVerifier);
 
     const codeChallenge = await generateCodeChallenge(codeVerifier);
     const redirectUri = encodeURIComponent(window.location.origin + "/index.html");
@@ -60,7 +60,7 @@ export function redirectToLocalLogin() {
 // ==========================
 export async function exchangeCodeForToken(code) {
     const redirectUri = window.location.origin + window.location.pathname;
-    const codeVerifier = sessionStorage.getItem('pkce_verifier');
+    const codeVerifier = getCookie('pkce_verifier');
     if (!codeVerifier) throw new Error("PKCE verifier not found");
 
     const body = new URLSearchParams({
@@ -80,22 +80,26 @@ export async function exchangeCodeForToken(code) {
     if (!res.ok) throw new Error("Token exchange failed: " + (await res.text()));
 
     const data = await res.json();
-    sessionStorage.setItem("token", data.access_token);
-    sessionStorage.setItem("refresh_token", data.refresh_token);
-    console.log("Token obtained:", data.access_token);
+    setCookie("token", encodeURIComponent(data.access_token));
+    setCookie("refresh_token", encodeURIComponent(data.refresh_token));
+    // console.log("Token obtained:", data.access_token);
 
     // remove ?code from URL
     window.history.replaceState({}, document.title, window.location.pathname);
-    sessionStorage.removeItem('pkce_verifier');
+    deleteCookie('pkce_verifier');
 }
 
 // ==========================
 // TOKEN UTILITYS
 // ==========================
 export function getTokenPayload() {
-    const token = sessionStorage.getItem("token");
-    if(!token) return null;
-    return JSON.parse(atob(token.split('.')[1]));
+    try{
+        const token = decodeURIComponent(getCookie("token"));
+        if(!token) return null;
+        return JSON.parse(atob(token.split('.')[1]));
+    } catch(err) {
+        return null; //token invalid
+    }
 }
 
 export function getUserRoles() {
@@ -107,35 +111,35 @@ export function getUserRoles() {
 }
 
 // TODO: not used yet
-export async function refreshToken() {
-    const refreshToken = sessionStorage.getItem("refresh_token");
-    if(!refreshToken) return redirectToLocalLogin();
+// export async function refreshToken() {
+//     const refreshToken = sessionStorage.getItem("refresh_token");
+//     if(!refreshToken) return redirectToLocalLogin();
 
-    const body = new URLSearchParams({
-        grant_type: "refresh_token",
-        client_id: CLIENT_ID,
-        refresh_token: refreshToken
-    });
+//     const body = new URLSearchParams({
+//         grant_type: "refresh_token",
+//         client_id: CLIENT_ID,
+//         refresh_token: refreshToken
+//     });
 
-    const res = await fetch(`${KEYCLOAK_BASE}/token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body.toString()
-    });
+//     const res = await fetch(`${KEYCLOAK_BASE}/token`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//         body: body.toString()
+//     });
 
-    if(!res.ok) return redirectToLocalLogin();
+//     if(!res.ok) return redirectToLocalLogin();
 
-    const data = await res.json();
-    sessionStorage.setItem("token", data.access_token);
-    sessionStorage.setItem("refresh_token", data.refresh_token);
-}
+//     const data = await res.json();
+//     sessionStorage.setItem("token", data.access_token);
+//     sessionStorage.setItem("refresh_token", data.refresh_token);
+// }
 
 
 // ==========================
 // SAFE FETCH
 // ==========================
 export async function safeFetch(url, options = {}) {
-    let token = sessionStorage.getItem("token");
+    let token = decodeURIComponent(getCookie("token"));
     // if (!token) {
     //     await redirectToLogin();
     //     return;
@@ -172,7 +176,7 @@ export async function safeFetch(url, options = {}) {
 //}
 
 export async function logout() {
-    const refreshToken = sessionStorage.getItem("refresh_token");
+    const refreshToken = decodeURIComponent(getCookie("refresh_token"));
     if (refreshToken) {
         const body = new URLSearchParams({
             client_id: CLIENT_ID,
@@ -190,9 +194,26 @@ export async function logout() {
         }
     }
 
-    // clear local session
-    sessionStorage.clear();
+    // clear cookies
+    deleteCookie("token");
+    deleteCookie("refresh_token");
 
     // redirect to local login page
     window.location.href = window.location.origin + "/login.html";
+}
+
+function setCookie(name, value, days = 1) {
+    const expires = new Date(Date.now() + days*24*60*60*1000).toUTCString();
+    document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+}
+
+// Get cookie
+function getCookie(name) {
+    return document.cookie.split('; ').find(row => row.startsWith(name+'='))
+        ?.split('=')[1];
+}
+
+// Delete cookie
+function deleteCookie(name) {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
 }
