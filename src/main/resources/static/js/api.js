@@ -1,6 +1,6 @@
 import { safeFetch } from "./auth.js";
 
-const API_BASE = "management";
+const API_BASE = "";
 
 export async function fetchOrganizations() {
     return await safeFetch(`${API_BASE}/organizations`);
@@ -47,7 +47,7 @@ export async function subscribeToPlan(org, plan, characteristics) {
         productOfferingPrice: plan.offeringPriceId,
         characteristics: characteristics
     };
-    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscription`, 
+    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscriptions`, 
             { 
                 method: "POST", 
                 headers: { "Content-Type": "application/json" },
@@ -58,7 +58,7 @@ export async function subscribeToPlan(org, plan, characteristics) {
 
 // update the the given subscription
 export async function updateSubscription(org, updatedSubscription) {
-    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscription/${updatedSubscription.id}`, 
+    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscriptions/${updatedSubscription.id}`, 
             {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -67,9 +67,11 @@ export async function updateSubscription(org, updatedSubscription) {
     );
 }
 
+/*
 export async function fetchAllowedStatuses() {
     return await safeFetch(`${API_BASE}/management/subscription/statuses`);
 }
+*/
 
 export async function fetchConfiguration() {
     let localConfig = {
@@ -80,29 +82,29 @@ export async function fetchConfiguration() {
                 description: "The subscription has been created but not yet activated",
                 allowedTransitions: ["pendingActive", "active"]
             },
-            active: {
-                label: "Active",
-                value: "active",
-                description: "The subscription is live and running",
-                allowedTransitions: ["suspended", "pendingTerminate", "terminated"]
-            },
             pendingActive: {
                 label: "Pending Active",
                 value: "pendingActive",
                 description: "The subscription is in activation phase. Not yes active but it is in progress",
                 allowedTransitions: ["active", "aborted", "cancelled"]
             },
-            pendingTerminate: {
-                label: "Pending Terminate",
-                value: "pendingTerminate",
-                description: "The subscription is still active, but a termination process is in progress. It will soon be terminated.",
-                allowedTransitions: ["terminated"]
+            active: {
+                label: "Active",
+                value: "active",
+                description: "The subscription is live and running",
+                allowedTransitions: ["suspended", "pendingTerminate", "terminated"]
             },
             suspended: {
                 label: "Suspended",
                 value: "suspended",
                 description: "The product is suspended - it could be an outcome from a customer request or provider decision",
                 allowedTransitions: ["active"]
+            },
+            pendingTerminate: {
+                label: "Pending Terminate",
+                value: "pendingTerminate",
+                description: "The subscription is still active, but a termination process is in progress. It will soon be terminated.",
+                allowedTransitions: ["terminated"]
             },
             /*
             FIXME: temporarily disabled, waiting for the brokerage-utils to fix the enum, removing space from "aborted "

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/management")
+@RequestMapping("/")
 @Tag(name = "Subscriptions Management Controller", description = "APIs to manage the subscriptions-management")
 public class SubscriptionManagementController {
 
@@ -49,6 +49,19 @@ public class SubscriptionManagementController {
         }
    }
 
+   /*
+    @GetMapping("/subscription/statuses")
+    public ResponseEntity<List<String>> getSubscriptionStatuses() {
+        try {
+            List<String> statuses = managementService.getProductStatuses();
+            return ResponseEntity.ok(statuses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build();
+        }
+    }
+    */
+
     @GetMapping("/organizations")
     public ResponseEntity<List<Organization>> listOrganizations() {
         try {
@@ -69,6 +82,59 @@ public class SubscriptionManagementController {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/organizations/{organizationId}/subscriptions")
+    public ResponseEntity<String> saveProduct(@PathVariable String organizationId, @RequestBody Subscription subscription) {
+        try {
+            String productId = managementService.createSubscription(subscription);
+            return ResponseEntity.ok(productId);
+        } catch (BadSubscriptionException | BadTmfDataException e) {
+            logger.error(e.getMessage(), e);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (ExternalServiceException e) {
+            logger.error(e.getMessage(), e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unexpected error: " + e.getMessage());
+        }
+    }
+
+    @PatchMapping("/organizations/{organizationId}/subscriptions/{subscriptionId}")
+    public ResponseEntity<?> updateProduct(
+            @PathVariable String organizationId,
+            @PathVariable String subscriptionId,
+            @RequestBody Product subscription
+    ) {
+        try {
+            managementService.updateSubscription(organizationId, subscription);
+            Map<String, String> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Product updated successfully!");
+            return ResponseEntity.ok(response);
+        } catch (BadSubscriptionException | BadTmfDataException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("status", "error");
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        } catch (ExternalServiceException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("status", "error");
+            error.put("message", "External service error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("status", "error");
+            error.put("message", "Unexpected error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 
@@ -115,68 +181,8 @@ public class SubscriptionManagementController {
         }
     }
 
-    @PostMapping("/organizations/{organizationId}/subscription")
-    public ResponseEntity<String> saveProduct(@PathVariable String organizationId, @RequestBody Subscription subscription) {
-        try {
-            String productId = managementService.createSubscription(subscription);
-            return ResponseEntity.ok(productId);
-        } catch (BadSubscriptionException | BadTmfDataException e) {
-            logger.error(e.getMessage(), e);
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
-        } catch (ExternalServiceException e) {
-            logger.error(e.getMessage(), e);
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(e.getMessage());
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Unexpected error: " + e.getMessage());
-        }
-    }
 
-    @PatchMapping("/organizations/{organizationId}/subscription/{subscriptionId}")
-    public ResponseEntity<?> updateProduct(
-            @PathVariable String organizationId,
-            @PathVariable String subscriptionId,
-            @RequestBody Product subscription
-    ) {
-        try {
-            managementService.updateSubscription(organizationId, subscription);
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Product updated successfully!");
-            return ResponseEntity.ok(response);
-        } catch (BadSubscriptionException | BadTmfDataException e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("status", "error");
-            error.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-        } catch (ExternalServiceException e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("status", "error");
-            error.put("message", "External service error: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("status", "error");
-            error.put("message", "Unexpected error: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-        }
-    }
 
-    @GetMapping("/subscription/statuses")
-    public ResponseEntity<List<String>> getSubscriptionStatuses() {
-        try {
-            List<String> statuses = managementService.getProductStatuses();
-            return ResponseEntity.ok(statuses);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .build();
-        }
-    }
+
 
 }
