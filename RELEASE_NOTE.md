@@ -2,7 +2,7 @@
  
 **Release Notes** of the *Subscriptions Management*
 
-### <code>0.1.X</code> :calendar: XX/12/2025
+### <code>0.1.2</code> :calendar: 15/12/2025
 **Enhancements**
 * more robust management in case of wrong product status values from tmf-api
 * order of statuses reshuffled in editor dropdown
