@@ -1,6 +1,6 @@
 # Subscriptions Management
 
-**Version:** 0.1.1  
+**Version:** 0.1.2  
 **Description:** Swagger REST APIs for the subscriptions-management software  
 
 
@@ -9,17 +9,16 @@
 ### Subscriptions Management Controller
 | Verb | Path | Task |
 |------|------|------|
-| POST | `/management/organizations/{organizationId}/subscription` | saveProduct |
-| PATCH | `/management/organizations/{organizationId}/subscription/{subscriptionId}` | updateProduct |
-| GET | `/management/subscription/statuses` | getSubscriptionStatuses |
-| GET | `/management/plans/active` | listProductOfferingPlans |
-| GET | `/management/organizations` | listOrganizations |
-| GET | `/management/organizations/{organizationId}/subscriptions` | listSubscriptions |
-| GET | `/management/configuration` | getConfiguration |
+| GET | `/organizations/{organizationId}/subscriptions` | listSubscriptions |
+| POST | `/organizations/{organizationId}/subscriptions` | saveProduct |
+| PATCH | `/organizations/{organizationId}/subscriptions/{subscriptionId}` | updateProduct |
+| GET | `/plans/active` | listProductOfferingPlans |
+| GET | `/organizations` | listOrganizations |
+| GET | `/configuration` | getConfiguration |
 
 ### Subscriptions Info Controller
 | Verb | Path | Task |
 |------|------|------|
-| GET | `/subscriptions/info` | getInfo |
-| GET | `/subscriptions/health` | getHealth |
+| GET | `/status/info` | getInfo |
+| GET | `/status/health` | getHealth |
 
