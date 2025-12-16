@@ -1,29 +1,27 @@
 import { safeFetch } from "./auth.js";
 
-const API_BASE = "";
-
 export async function fetchOrganizations() {
-    return await safeFetch(`${API_BASE}/organizations`);
+    return await safeFetch(`organizations`);
 }
 
 export async function fetchSubscriptions(orgId) {
-    return await safeFetch(`${API_BASE}/organizations/${orgId}/subscriptions`);
+    return await safeFetch(`organizations/${orgId}/subscriptions`);
 }
 
 /*
 export async function fetchCurrentSubscriptions(orgId) {
     alert("deprecated 1");
-    return await safeFetch(`${API_BASE}/organizations/${orgId}/subscriptions/current`);
+    return await safeFetch(`organizations/${orgId}/subscriptions/current`);
 }
 
 export async function fetchOtherSubscriptions(orgId) {
     alert("deprecated 2");
-    return await safeFetch(`${API_BASE}/organizations/${orgId}/subscriptions/older`);
+    return await safeFetch(`organizations/${orgId}/subscriptions/older`);
 }
 */
 
 export async function fetchPlans() {
-    let plans = await safeFetch(`${API_BASE}/plans/active`);
+    let plans = await safeFetch(`plans/active`);
     // workaround: add configurable characteristics. These should come from the server
     /*
     for(var plan of plans) {
@@ -47,7 +45,7 @@ export async function subscribeToPlan(org, plan, characteristics) {
         productOfferingPrice: plan.offeringPriceId,
         characteristics: characteristics
     };
-    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscriptions`, 
+    return await safeFetch(`organizations/${org.id}/subscriptions`, 
             { 
                 method: "POST", 
                 headers: { "Content-Type": "application/json" },
@@ -58,7 +56,7 @@ export async function subscribeToPlan(org, plan, characteristics) {
 
 // update the the given subscription
 export async function updateSubscription(org, updatedSubscription) {
-    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscriptions/${updatedSubscription.id}`, 
+    return await safeFetch(`organizations/${org.id}/subscriptions/${updatedSubscription.id}`, 
             {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -130,7 +128,7 @@ export async function fetchConfiguration() {
         },
         finalStatuses : ["aborted", "cancelled", "terminated"]
     }
-    let remoteConfig = await safeFetch(`${API_BASE}/configuration`);
+    let remoteConfig = await safeFetch(`configuration`);
 
     let config = {...localConfig, ...remoteConfig};
 
