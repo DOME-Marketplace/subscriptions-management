@@ -25,7 +25,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/")
-@PreAuthorize("hasRole('admin')")
+@PreAuthorize("hasRole('AdminSM')")
 @Tag(name = "Subscriptions Management Controller", description = "APIs to manage the subscriptions-management")
 public class SubscriptionManagementController {
 
@@ -182,9 +182,5 @@ public class SubscriptionManagementController {
                     .build();
         }
     }
-
-
-
-
 
 }

@@ -13,7 +13,7 @@
 	
 	<groupId>it.eng.dome.tool</groupId>
 	<artifactId>subscriptions-management</artifactId>
-	<version>0.1.1</version>
+	<version>1.0.0</version>
 	<name>subscription-management</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -53,6 +53,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
 		<!--<dependency>
 			<groupId>org.springframework.boot</groupId>

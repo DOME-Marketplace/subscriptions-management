@@ -1,13 +1,44 @@
-import { safeFetch } from "./auth.js";
+export async function fetchMe() {
+    const res = await fetch("/me", { credentials: "include" });
 
-const API_BASE = "";
+    if (res.status === 401) {
+        window.location.href = "/login.html"; //local login page
+        return;
+    }
+
+    if (!res.ok) {
+        throw new Error(await readError(res, "Error fetch User Info"));
+    }
+
+    return res.json();
+}
 
 export async function fetchOrganizations() {
-    return await safeFetch(`${API_BASE}/organizations`);
+    const res = await fetch(`organizations`, { 
+        credentials: "include" 
+    });
+
+    if (await handle401(res)) return;
+
+    if (!res.ok) {
+        throw new Error(await readError(res, "Error fetch Organizations"));
+    }
+
+    return res.json();
 }
 
 export async function fetchSubscriptions(orgId) {
-    return await safeFetch(`${API_BASE}/organizations/${orgId}/subscriptions`);
+    const res = await fetch(`organizations/${orgId}/subscriptions`, {
+        credentials: "include" 
+    });
+    
+    if (await handle401(res)) return;
+
+    if (!res.ok) {
+        throw new Error(await readError(res, "Error fetch Subscriptions"));
+    }
+
+    return res.json();
 }
 
 /*
@@ -23,7 +54,15 @@ export async function fetchOtherSubscriptions(orgId) {
 */
 
 export async function fetchPlans() {
-    let plans = await safeFetch(`${API_BASE}/plans/active`);
+    const res = await fetch(`plans/active`, {
+        credentials: "include"
+    });
+
+    if (await handle401(res)) return;
+
+    if (!res.ok) {
+        throw new Error(await readError(res, "Error fetch Plans"));
+    }
     // workaround: add configurable characteristics. These should come from the server
     /*
     for(var plan of plans) {
@@ -36,35 +75,51 @@ export async function fetchPlans() {
         plan.configurableCharacteristics.push({key: "activationDate", type:"date", label: "Activation date"});
     }
     */
-    return plans;
+    return res.json();
 }
 
 // subscribe the given org to the given plan (with the given params)
 export async function subscribeToPlan(org, plan, characteristics) {
-    let subscription = { 
+    const subscription = { 
         organizationId: org.id,
         productOfferingId: plan.offeringId,
         productOfferingPrice: plan.offeringPriceId,
         characteristics: characteristics
     };
-    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscriptions`, 
-            { 
-                method: "POST", 
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(subscription)
-            }
-    );
+
+    const res = await fetch(`organizations/${org.id}/subscriptions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // cookie
+        body: JSON.stringify(subscription)
+    });
+
+    if (await handle401(res)) return;
+
+    if (!res.ok) {
+        throw new Error(await readError(res, "Error subscribe to plan"));
+    }
+
+    return res.json();
 }
 
 // update the the given subscription
 export async function updateSubscription(org, updatedSubscription) {
-    return await safeFetch(`${API_BASE}/organizations/${org.id}/subscriptions/${updatedSubscription.id}`, 
+    const res = await fetch(`organizations/${org.id}/subscriptions/${updatedSubscription.id}`, 
             {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
+                credentials: "include", // cookie
                 body: JSON.stringify(updatedSubscription)
-        }
-    );
+    });
+
+    if (await handle401(res)) return;
+
+    if (!res.ok) {
+        throw new Error(await readError(res, "Error updating subscription"));
+    }
+
+    return res.json();
 }
 
 /*
@@ -130,9 +185,35 @@ export async function fetchConfiguration() {
         },
         finalStatuses : ["aborted", "cancelled", "terminated"]
     }
-    let remoteConfig = await safeFetch(`${API_BASE}/configuration`);
+    
+    const res = await fetch("/configuration", { credentials: "include" });
+    if (!res.ok) {
+        console.warn("Failed to fetch remote configuration, using local defaults");
+        return localConfig;
+    }
+
+    const remoteConfig = await res.json()
 
     let config = {...localConfig, ...remoteConfig};
 
     return config;
+}
+
+async function readError(res, fallback = "Unexpected error") {
+    const contentType = res.headers.get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+        const json = await res.json();
+        return json.message || JSON.stringify(json);
+    }
+
+    return await res.text() || fallback;
+}
+
+async function handle401(res) {
+    if (res.status === 401) {
+        redirectToLogin();
+        return true;
+    }
+    return false;
 }
