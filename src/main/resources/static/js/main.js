@@ -1,11 +1,4 @@
-import {
-    redirectToLogin,
-    exchangeCodeForToken,
-    logout,
-    redirectToLocalLogin,
-    getTokenPayload,
-    getUserRoles,
-} from "./auth.js";
+import {logout} from "./auth.js";
 import * as api from "./api.js";
 import * as render from "./render.js";
 import * as handlers from "./handlers.js";
@@ -13,42 +6,27 @@ import * as handlers from "./handlers.js";
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         // ==========================
-        // KEYCLOAK 'CODE' MANAGEMENT TO ACCESS TOKEN
-        // ==========================
-         const params = new URLSearchParams(window.location.search);
-         const code = params.get("code");
-         if(code) await exchangeCodeForToken(code);
-
-        // ==========================
-        // TOKEN CONTROL
-        // ==========================
-        const payload = getTokenPayload();
-        if (!payload) {
-            redirectToLocalLogin();
-            return;
-        }
-
-        // ==========================
         // ROLE CHECK
         // ==========================
-        const roles = getUserRoles();
-        if (!roles.includes("admin")) {
+        const me = await api.fetchMe();
+
+        const roles = me.roles;
+
+        if (!roles.includes("AdminSM")) {
             render.showModalAlert(
                 "Access Denied",
                 "You do not have permission to access this application."
             );
-            setTimeout(() => logout(), 2000);
+            setTimeout(() => logout(), 3000);
             return;
         }
 
         // ==========================
         // USER NAV INFO AND LOGOUT BTN
         // ==========================
-        const username = payload.preferred_username || payload.name || "Guest";
+        const username = me.username || "Guest";
         const userNameElem = document.querySelector("#user-name");
-        //if(userNameElem) userNameElem.textContent = username;
         if (userNameElem) {
-                // const roles = getUserRoles();
                 userNameElem.textContent = `${username} (${roles.join(", ")})`;
         }
 
