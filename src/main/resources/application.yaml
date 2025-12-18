@@ -8,11 +8,28 @@ spring:
   application:
     name: subscriptions-management
 
-#  security:
-#    oauth2:
-#      resourceserver:
-#        jwt:
-#          issuer-uri: http://localhost:8080/realms/myrealm
+  security:
+    oauth2:
+      client:
+        registration:
+          dome:
+            client-id: ${DOME_CLIENT_ID:subscription-manager}
+            client-secret: ${DOME_CLIENT_SECRET:7mBxUTbVjSGlKawL7VGHUTYu5xp0GZKs}
+            authorization-grant-type: authorization_code
+            redirect-uri: "${REDIRECT_URI:{baseUrl}/login/oauth2/code/dome}"
+            scope:
+              - openid
+              - profile
+              - email
+              - groups
+        provider:
+          dome:
+            issuer-uri: ${DOME_ISSUER_URI:https://cs-identity.dome-marketplace-sbx.org/realms/dome}
+
+keycloak:
+  client-resource: ${KEYCLOAK_CLIENT_RESOURCE:subscription-manager}
+  jwks-uri: ${KEYCLOAK_JWKS_URI:https://cs-identity.dome-marketplace-sbx.org/realms/dome/protocol/openid-connect/certs}
+  redirect-logout-uri: "${REDIRECT_LOGOUT_URI:{baseUrl}/login.html}"
 
 # Logging Configuration
 logging:
