@@ -14,7 +14,7 @@ spring:
         registration:
           dome:
             client-id: ${DOME_CLIENT_ID:subscription-manager}
-            client-secret: ${DOME_CLIENT_SECRET:7mBxUTbVjSGlKawL7VGHUTYu5xp0GZKs}
+            client-secret: ${DOME_CLIENT_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: "${REDIRECT_URI:{baseUrl}/login/oauth2/code/dome}"
             scope:

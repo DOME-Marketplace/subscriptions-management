@@ -31,9 +31,6 @@ public class UserController {
                 .map(role -> role.substring(5)) // remove prefix "ROLE
                 .toList();
 
-        System.out.println("Username: " + username);
-        System.out.println("Authorities: " + roles);
-
         return Map.of(
                 "username", username,
                 "roles", roles
