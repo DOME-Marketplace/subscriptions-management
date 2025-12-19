@@ -42,6 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // all static resources are permitted
                         .requestMatchers(
+                                "/subscriptions/",
                                 "/auth/**",
                                 "/login.html",
                                 "/index.html",

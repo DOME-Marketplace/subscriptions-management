@@ -1,10 +1,8 @@
+import {redirectToLocalLogin} from "./auth.js";
 export async function fetchMe() {
-    const res = await fetch("/me", { credentials: "include" });
+    const res = await fetch("me", { credentials: "include" });
 
-    if (res.status === 401) {
-        window.location.href = "/login.html"; //local login page
-        return;
-    }
+    if (await handle401(res)) return;
 
     if (!res.ok) {
         throw new Error(await readError(res, "Error fetch User Info"));
@@ -186,7 +184,7 @@ export async function fetchConfiguration() {
         finalStatuses : ["aborted", "cancelled", "terminated"]
     }
     
-    const res = await fetch("/configuration", { credentials: "include" });
+    const res = await fetch("configuration", { credentials: "include" });
     if (!res.ok) {
         console.warn("Failed to fetch remote configuration, using local defaults");
         return localConfig;
@@ -212,7 +210,7 @@ async function readError(res, fallback = "Unexpected error") {
 
 async function handle401(res) {
     if (res.status === 401) {
-        redirectToLogin();
+        redirectToLocalLogin();
         return true;
     }
     return false;
