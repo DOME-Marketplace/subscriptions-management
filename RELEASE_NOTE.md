@@ -2,6 +2,12 @@
  
 **Release Notes** of the *Subscriptions Management*
 
+### <code>1.0.0</code> :calendar: 19/12/2025
+**Improvements**
+* Enhance authentication and authorization mechanisms.
+* Refactor authentication flow to use OAuth2 with DOME Keycloak (SBX).
+* Update Brokerage Utils dependency to version 2.2.6.
+
 ### <code>0.1.3</code> :calendar: 16/12/2025
 **Bug fixes**
 * fix base path in the `api.js`

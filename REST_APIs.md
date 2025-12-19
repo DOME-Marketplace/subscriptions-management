@@ -1,6 +1,6 @@
 # Subscriptions Management
 
-**Version:** 0.1.3  
+**Version:** 1.0.0  
 **Description:** Swagger REST APIs for the subscriptions-management software  
 
 

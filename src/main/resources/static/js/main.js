@@ -1,4 +1,4 @@
-import { redirectToLogin, exchangeCodeForToken, logout, redirectToLocalLogin } from "./auth.js";
+import {logout} from "./auth.js";
 import * as api from "./api.js";
 import * as render from "./render.js";
 import * as handlers from "./handlers.js";
@@ -6,30 +6,31 @@ import * as handlers from "./handlers.js";
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         // ==========================
-        // GESTIONE CODE DA KEYCLOAK
+        // ROLE CHECK
         // ==========================
-        // const params = new URLSearchParams(window.location.search);
-        // const code = params.get("code");
-        // if(code) await exchangeCodeForToken(code);
+        const me = await api.fetchMe();
 
-        // ==========================
-        // TOKEN CONTROL
-        // ==========================
-        const token = sessionStorage.getItem("token");
-        if(!token){
-            // redirectToLocalLogin();
-            // return;
+        const roles = me.roles;
+
+        if (!roles.includes("AdminSM")) {
+            render.showModalAlert(
+                "Access Denied",
+                "You do not have permission to access this application."
+            );
+            setTimeout(() => logout(), 3000);
+            return;
         }
 
         // ==========================
-        // SALUTO UTENTE + LOGOUT
+        // USER NAV INFO AND LOGOUT BTN
         // ==========================
-        // const payload = JSON.parse(atob(token.split('.')[1]));
-        // const username = payload.preferred_username || payload.name || "Guest";
-        const username = "devMode";
+        const username = me.username || "Guest";
         const userNameElem = document.querySelector("#user-name");
-        if(userNameElem) userNameElem.textContent = username;
+        if (userNameElem) {
+                userNameElem.textContent = `${username} (${roles.join(", ")})`;
+        }
 
+        //logout button
         const logoutBtn = document.querySelector("#logoutBtn");
         if(logoutBtn) logoutBtn.onclick = logout;
 
