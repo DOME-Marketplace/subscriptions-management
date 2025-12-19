@@ -2,6 +2,11 @@
  
 **Release Notes** of the *Subscriptions Management*
 
+### <code>1.0.1</code> :calendar: 19/12/2025
+**Improvements**
+* Add support for `/subscriptions` context-path in both frontend and backend.
+* Add `WebConfig` class to redirect base path (`/subscriptions`) to `login.html`.
+
 ### <code>1.0.0</code> :calendar: 19/12/2025
 **Improvements**
 * Enhance authentication and authorization mechanisms.
